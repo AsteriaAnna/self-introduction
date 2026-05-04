@@ -42,12 +42,12 @@ function Section({ id, title, children, isLight = true }: {
   return (
     <section
       id={id}
-      className={`min-h-screen py-20 px-4 transition-all duration-1000 ${
+      className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 transition-all duration-1000 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       } ${isLight ? 'bg-white dark:bg-gray-950' : 'bg-gray-50 dark:bg-gray-900'}`}
     >
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center">{title}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">{title}</h2>
         {children}
       </div>
     </section>
@@ -56,6 +56,7 @@ function Section({ id, title, children, isLight = true }: {
 
 function GraphPreview() {
   const [isVisible, setIsVisible] = useState(false)
+  const [graphHeight, setGraphHeight] = useState(500)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,24 +80,40 @@ function GraphPreview() {
     }
   }, [])
 
+  useEffect(() => {
+    const updateHeight = () => {
+      if (window.innerWidth < 640) {
+        setGraphHeight(400)
+      } else if (window.innerWidth < 1024) {
+        setGraphHeight(450)
+      } else {
+        setGraphHeight(550)
+      }
+    }
+
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
+
   return (
     <section
       id="graph-preview"
-      className={`relative min-h-screen py-20 px-4 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-gray-100 dark:to-gray-950 transition-all duration-1000 ${
+      className={`relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-gray-100 dark:to-gray-950 transition-all duration-1000 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
     >
       <StarField />
 
       <div className="relative z-10 max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-gray-900 dark:from-white to-green-600 dark:to-green-500 bg-clip-text text-transparent">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center bg-gradient-to-r from-gray-900 dark:from-white to-green-600 dark:to-green-500 bg-clip-text text-transparent">
           知识图谱
         </h2>
-        <p className="text-center text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
           点击节点查看技能、项目或经历的详情
         </p>
 
-        <KnowledgeGraph />
+        <KnowledgeGraph height={graphHeight} />
       </div>
     </section>
   )
@@ -118,22 +135,22 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white overflow-x-hidden">
       <Navbar />
       <main>
         <Hero />
 
         <GraphPreview />
 
-        <section id="jdmatcher" className="py-12 px-4 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
+        <section id="jdmatcher" className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
           <div className="max-w-4xl mx-auto">
             <JDMatcher />
           </div>
         </section>
 
-        <section id="keywords" className="py-12 px-4 bg-white dark:bg-gray-950 transition-all duration-1000">
+        <section id="keywords" className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950 transition-all duration-1000">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-center">技能标签</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">技能标签</h2>
             <KeywordsCloud
               selectedKeywords={selectedKeywords}
               onKeywordClick={handleKeywordClick}
@@ -142,12 +159,12 @@ export default function Home() {
         </section>
 
         {selectedKeywords.length > 0 && (
-          <div className="fixed bottom-8 right-8 z-40">
+          <div className="fixed bottom-4 sm:bottom-8 right-4 sm:right-8 z-40">
             <button
               onClick={clearAllFilters}
-              className="px-6 py-3 bg-green-600 text-white rounded-full shadow-xl hover:bg-green-700 transition-all duration-300 flex items-center gap-2 font-medium"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-full shadow-xl hover:bg-green-700 transition-all duration-300 flex items-center gap-2 font-medium text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
               清除筛选 ({selectedKeywords.length})
@@ -164,7 +181,7 @@ export default function Home() {
         </Section>
 
         <Section id="contact" title="联系我" isLight={false}>
-          <p className="text-gray-500 dark:text-gray-400 text-center">
+          <p className="text-gray-500 dark:text-gray-400 text-center text-sm sm:text-base">
             联系方式已在首页展示
           </p>
         </Section>

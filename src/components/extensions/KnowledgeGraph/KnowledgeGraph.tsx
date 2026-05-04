@@ -13,9 +13,10 @@ interface TooltipData {
 interface KnowledgeGraphProps {
   isPreview?: boolean
   highlightedLabels?: string[]
+  height?: number
 }
 
-export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管', '团队协作', '学习能力'] }: KnowledgeGraphProps) {
+export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管', '团队协作', '学习能力'], height = 600 }: KnowledgeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, node: null })
@@ -329,7 +330,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
   return (
     <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full h-[600px] bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+      <div ref={containerRef} className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800" style={{ height: `${height}px` }}>
         <svg ref={svgRef} className="w-full h-full" />
       </div>
 
