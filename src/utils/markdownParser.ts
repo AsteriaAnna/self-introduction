@@ -13,7 +13,7 @@ const experienceFiles = import.meta.glob('/src/data/experiences/*.md', {
 })
 
 function parseFrontMatter(content: string): { data: Record<string, any>; content: string } {
-  const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/
+  const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/
   const match = content.match(frontMatterRegex)
 
   if (!match) {
@@ -37,20 +37,20 @@ function parseFrontMatter(content: string): { data: Record<string, any>; content
     }
   })
 
-  return { data, content: rest }
+  return { data, content: rest?.trim() || '' }
 }
 
 export function parseProject(markdown: string): Project {
   const { data, content } = parseFrontMatter(markdown)
   return {
-    id: data.id || '',
-    title: data.title || '',
-    description: data.description || '',
+    id: String(data.id || ''),
+    title: String(data.title || ''),
+    description: String(data.description || ''),
     tags: Array.isArray(data.tags) ? data.tags : [],
-    link: data.link,
-    image: data.image,
-    date: data.date || '',
-    status: data.status || 'completed',
+    link: data.link ? String(data.link) : undefined,
+    image: data.image ? String(data.image) : undefined,
+    date: String(data.date || ''),
+    status: (data.status as Project['status']) || 'completed',
     content: content
   }
 }
@@ -58,26 +58,52 @@ export function parseProject(markdown: string): Project {
 export function parseExperience(markdown: string): Experience {
   const { data, content } = parseFrontMatter(markdown)
   return {
-    id: data.id || '',
-    company: data.company || '',
-    role: data.role || '',
-    period: data.period || '',
-    description: data.description || '',
+    id: String(data.id || ''),
+    company: String(data.company || ''),
+    role: String(data.role || ''),
+    period: String(data.period || ''),
+    description: String(data.description || ''),
     tags: Array.isArray(data.tags) ? data.tags : [],
-    location: data.location,
+    location: data.location ? String(data.location) : undefined,
     content: content
   }
 }
 
 export function getAllProjects(): Project[] {
-  return Object.values(projectFiles)
-    .map((content) => parseProject(content as string))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  try {
+    return Object.values(projectFiles)
+      .map((content) => {
+        try {
+          return parseProject(content as string)
+        } catch (err) {
+          console.error('Failed to parse project:', err)
+          return null
+        }
+      })
+      .filter((p): p is Project => p !== null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  } catch (err) {
+    console.error('Failed to load projects:', err)
+    return []
+  }
 }
 
 export function getAllExperiences(): Experience[] {
-  return Object.values(experienceFiles)
-    .map((content) => parseExperience(content as string))
+  try {
+    return Object.values(experienceFiles)
+      .map((content) => {
+        try {
+          return parseExperience(content as string)
+        } catch (err) {
+          console.error('Failed to parse experience:', err)
+          return null
+        }
+      })
+      .filter((e): e is Experience => e !== null)
+  } catch (err) {
+    console.error('Failed to load experiences:', err)
+    return []
+  }
 }
 
 export function getProjectById(id: string): Project | undefined {

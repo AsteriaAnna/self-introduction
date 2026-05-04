@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { Experience } from '@/types'
 
 interface TimelineItemProps {
@@ -7,6 +9,8 @@ interface TimelineItemProps {
 }
 
 export function TimelineItem({ experience, isLast = false, isHighlighted = false }: TimelineItemProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   return (
     <div className="relative pl-8 pb-8">
       {!isLast && (
@@ -52,7 +56,7 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
           {experience.description}
         </p>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           {experience.tags.map((tag) => (
             <span
               key={tag}
@@ -62,6 +66,31 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
             </span>
           ))}
         </div>
+
+        {experience.content && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-2 text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
+          >
+            {isExpanded ? '收起详情' : '查看详情'}
+            <svg
+              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        )}
+
+        {isExpanded && experience.content && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown>{experience.content}</ReactMarkdown>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

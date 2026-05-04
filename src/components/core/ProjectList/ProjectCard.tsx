@@ -8,7 +8,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps) {
   return (
     <div
-      className={`p-6 rounded-lg border transition-all duration-300 ${
+      className={`p-6 rounded-lg border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
         isHighlighted
           ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
           : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-green-500 dark:hover:border-green-600'
@@ -57,7 +57,7 @@ export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps
             href={project.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium"
+            className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
           >
             查看项目 →
           </a>

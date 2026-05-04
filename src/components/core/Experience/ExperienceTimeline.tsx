@@ -52,10 +52,10 @@ export function ExperienceTimeline({ highlightedIds = [], filterKeyword = null }
       {filteredExperiences.map((experience, index) => (
         <div
           key={experience.id}
-          className={`transition-all duration-700 ${
+          className={`transition-all duration-700 ease-out ${
             isVisible
-              ? 'opacity-100 translate-x-0'
-              : 'opacity-0 -translate-x-10'
+              ? 'opacity-100 translate-x-0 translate-y-0'
+              : 'opacity-0 -translate-x-12 translate-y-8'
           }`}
           style={{ transitionDelay: `${index * 150}ms` }}
         >
