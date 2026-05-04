@@ -4,10 +4,14 @@ import ReactMarkdown from 'react-markdown'
 import { Experience } from '@/types'
 import { getExperienceById } from '@/utils/markdownParser'
 import { Navbar } from '@components/common/Layout'
+import { useTheme } from '@components/extensions/Theme'
+import { useLanguage } from '@components/extensions/Language'
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>()
   const [experience, setExperience] = useState<Experience | null>(null)
+  const { theme } = useTheme()
+  const { t } = useLanguage()
 
   useEffect(() => {
     if (id) {
@@ -18,12 +22,14 @@ export default function ExperienceDetail() {
 
   if (!experience) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
         <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <h1 className="text-3xl font-bold mb-4">经历不存在</h1>
-          <Link to="/" className="text-green-600 dark:text-green-500 hover:underline">
-            返回首页
+        <div className="max-w-2xl mx-auto px-6 py-32 text-center">
+          <h1 className="text-2xl font-light text-gray-900 dark:text-white mb-8">
+            {t('not.found.title')}
+          </h1>
+          <Link to="/" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors text-sm tracking-wide">
+            {t('not.found.subtitle')}
           </Link>
         </div>
       </div>
@@ -31,66 +37,64 @@ export default function ExperienceDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
       <Navbar />
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-3xl mx-auto px-6 pt-32 pb-20">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 mb-8 font-medium"
+          className="inline-flex items-center gap-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mb-16 text-sm tracking-wide transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
           </svg>
-          返回首页
+          {t('nav.back')}
         </Link>
 
-        <article className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-8 md:p-12">
-          <header className="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
-            <h1 className="text-4xl font-bold mb-4">{experience.role}</h1>
-            <div className="flex flex-wrap gap-4 items-center text-gray-600 dark:text-gray-300 mb-4">
-              <span className="text-xl text-green-600 dark:text-green-500 font-medium">
-                {experience.company}
-              </span>
-              <span className="text-gray-400">|</span>
-              <span>{experience.period}</span>
-              {experience.location && (
-                <>
-                  <span className="text-gray-400">|</span>
-                  <span>{experience.location}</span>
-                </>
-              )}
-            </div>
-
-            {experience.skillTags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {experience.skillTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+        <header className="mb-16">
+          <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-gray-900 dark:text-white mb-4">
+            {experience.role}
+          </h1>
+          <div className={`flex flex-wrap gap-3 items-center mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            <span className="text-base">{experience.company}</span>
+            <span className={theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}>·</span>
+            <span className="text-sm">{experience.period}</span>
+            {experience.location && (
+              <>
+                <span className={theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}>·</span>
+                <span className="text-sm">{experience.location}</span>
+              </>
             )}
-
-            {experience.abilityTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {experience.abilityTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </header>
-
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <ReactMarkdown>{experience.content}</ReactMarkdown>
           </div>
+
+          {experience.skillTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {experience.skillTags.map((tag) => (
+                <span
+                  key={tag}
+                  className={`text-xs px-3 py-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {experience.abilityTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {experience.abilityTags.map((tag) => (
+                <span
+                  key={tag}
+                  className={`text-xs px-3 py-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
+
+        <article className={`prose prose-lg dark:prose-invert max-w-none ${theme === 'dark' ? 'prose-gray-400' : 'prose-gray-600'}`}>
+          <ReactMarkdown>{experience.content}</ReactMarkdown>
         </article>
       </main>
     </div>

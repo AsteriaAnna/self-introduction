@@ -229,7 +229,8 @@ interface Project {
   id: string;
   title: string;
   description: string;
-  tags: string[];
+  skillTags: string[];      // 技术标签：React, TypeScript 等
+  abilityTags: string[];   // 能力标签：团队协作, 学习能力 等
   link?: string;
   image?: string;
   date: string;
@@ -243,7 +244,8 @@ interface Experience {
   role: string;
   period: string;
   description: string;
-  tags: string[];
+  skillTags: string[];      // 技术标签：React, Node.js 等
+  abilityTags: string[];   // 能力标签：团队管理, 沟通 等
   location?: string;
   content: string;
 }

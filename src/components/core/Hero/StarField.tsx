@@ -64,7 +64,6 @@ export function StarField() {
         }
       })
 
-      const allDead = particles.every(p => p.life > p.maxLife || p.y < -10)
       const visibleParticles = particles.filter(p => p.life < p.maxLife && p.y > -10)
 
       if (visibleParticles.length > 0) {
@@ -72,22 +71,20 @@ export function StarField() {
       }
     }
 
+    const handleResize = () => {
+      resize()
+      createParticles()
+      animate()
+    }
+
     resize()
     createParticles()
     animate()
 
-    window.addEventListener('resize', () => {
-      resize()
-      createParticles()
-      animate()
-    })
+    window.addEventListener('resize', handleResize)
 
     return () => {
-      window.removeEventListener('resize', () => {
-        resize()
-        createParticles()
-        animate()
-      })
+      window.removeEventListener('resize', handleResize)
       if (animationId) {
         cancelAnimationFrame(animationId)
       }

@@ -1,5 +1,5 @@
 import { Component, ReactNode, ErrorInfo } from 'react'
-import { useErrorContext } from './ErrorProvider'
+import { logger } from '@utils/logger'
 
 interface Props {
   children: ReactNode
@@ -36,8 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo })
-    const { logError } = useErrorContext()
-    logError(error, errorInfo, classifyError(error))
+    logger.error('ErrorBoundary caught an error', 'ErrorBoundary', undefined, error)
   }
 
   resetError = () => {

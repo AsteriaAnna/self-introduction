@@ -198,7 +198,7 @@ git commit -m "add hero and update dependencies"
 | **接口契约类** | 401/403/400, api | 检查接口文档 |
 
 **3. 快速验证假设（5秒）**
-- 怀疑环境变量：`console.log(process.env.XXX)`
+- 怀疑环境变量：`log.debug('Checking env', { key: 'XXX', value: process.env.XXX })`
 - 怀疑依赖：`npm list <package>`
 - 怀疑逻辑：打印中间值
 - 怀疑类型：对照错误行看数据类型

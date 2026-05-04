@@ -134,7 +134,7 @@ class Logger {
 
 export const logger = new Logger()
 
-interface ModuleLogger {
+export interface ModuleLogger {
   debug: (message: string, details?: Record<string, unknown>) => void
   info: (message: string, details?: Record<string, unknown>) => void
   warn: (message: string, details?: Record<string, unknown>) => void

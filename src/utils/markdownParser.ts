@@ -1,18 +1,19 @@
 import { Project, Experience } from '@/types'
+import { logger } from '@utils/logger'
 
 const projectFiles = import.meta.glob('/src/data/projects/*.md', {
   query: '?raw',
   import: 'default',
   eager: true
-})
+}) as Record<string, string>
 
 const experienceFiles = import.meta.glob('/src/data/experiences/*.md', {
   query: '?raw',
   import: 'default',
   eager: true
-})
+}) as Record<string, string>
 
-function parseFrontMatter(content: string): { data: Record<string, any>; content: string } {
+function parseFrontMatter(content: string): { data: Record<string, unknown>; content: string } {
   const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/
   const match = content.match(frontMatterRegex)
 
@@ -21,13 +22,13 @@ function parseFrontMatter(content: string): { data: Record<string, any>; content
   }
 
   const [, frontMatter, rest] = match
-  const data: Record<string, any> = {}
+  const data: Record<string, unknown> = {}
 
   frontMatter.split('\n').forEach(line => {
     const colonIndex = line.indexOf(':')
     if (colonIndex > 0) {
       const key = line.slice(0, colonIndex).trim()
-      let value = line.slice(colonIndex + 1).trim()
+      let value: string | string[] = line.slice(colonIndex + 1).trim()
 
       if (value.startsWith('[') && value.endsWith(']')) {
         value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''))
@@ -78,14 +79,14 @@ export function getAllProjects(): Project[] {
         try {
           return parseProject(content as string)
         } catch (err) {
-          console.error('Failed to parse project:', err)
+          logger.error('Failed to parse project', 'MarkdownParser', undefined, err as Error)
           return null
         }
       })
       .filter((p): p is Project => p !== null)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   } catch (err) {
-    console.error('Failed to load projects:', err)
+    logger.error('Failed to load projects', 'MarkdownParser', undefined, err as Error)
     return []
   }
 }
@@ -97,13 +98,13 @@ export function getAllExperiences(): Experience[] {
         try {
           return parseExperience(content as string)
         } catch (err) {
-          console.error('Failed to parse experience:', err)
+          logger.error('Failed to parse experience', 'MarkdownParser', undefined, err as Error)
           return null
         }
       })
       .filter((e): e is Experience => e !== null)
   } catch (err) {
-    console.error('Failed to load experiences:', err)
+    logger.error('Failed to load experiences', 'MarkdownParser', undefined, err as Error)
     return []
   }
 }

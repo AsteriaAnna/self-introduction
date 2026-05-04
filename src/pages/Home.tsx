@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Navbar } from '@components/common/Layout'
-import { config } from '@/data/config'
+import { SiteConfig } from '@/types'
+import configJson from '@/data/config.json'
 import { getAllProjects, getAllExperiences } from '@/utils/markdownParser'
 import { Keyword } from '@/types'
 import { KnowledgeGraph } from '@components/extensions/KnowledgeGraph/KnowledgeGraph'
+import { useTheme } from '@components/extensions/Theme'
+import { useLanguage } from '@components/extensions/Language'
+
+const config = configJson as SiteConfig
 
 function useScrollAnimation(id: string) {
   const [isVisible, setIsVisible] = useState(false)
@@ -35,53 +41,57 @@ function useScrollAnimation(id: string) {
 
 function HeroSection() {
   const isVisible = useScrollAnimation('hero')
+  const { theme } = useTheme()
+  const { t } = useLanguage()
 
   return (
     <section
       id="hero"
-      className="min-h-screen flex items-center justify-center py-20 px-6 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-gray-950" />
-      
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
+      <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`} />
+
+      <div className="relative z-10 max-w-3xl mx-auto text-center">
         <div
           className={`transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-400 text-sm sm:text-base tracking-widest uppercase mb-6 font-medium">
-            你好，我是
+          <p className={`text-xs sm:text-sm tracking-[0.3em] uppercase mb-4 sm:mb-8 text-gray-400 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+            {t('hero.hello')}
           </p>
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white mb-6">
+          <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight mb-4 sm:mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {config.name}
           </h1>
-          <p className="text-2xl sm:text-3xl text-gray-400 mb-8 font-light">
+          <p className={`text-base sm:text-xl font-light mb-8 sm:mb-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
             {config.title}
           </p>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+          <p className={`text-sm sm:text-base leading-loose max-w-xl mx-auto mb-12 sm:mb-16 px-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
             {config.bio}
           </p>
-          
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href={`mailto:${config.email}`}
-              className="px-8 py-4 bg-green-600 hover:bg-green-500 text-white rounded-full transition-all duration-300 font-medium shadow-lg shadow-green-900/30 hover:shadow-green-800/40 hover:-translate-y-0.5"
-            >
-              联系我
-            </a>
+
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            {config.email && (
+              <a
+                href={`mailto:${config.email}`}
+                className={`px-8 sm:px-10 py-3 text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} border-b-2 ${theme === 'dark' ? 'border-white/20 hover:border-white' : 'border-gray-900/20 hover:border-gray-900'}`}
+              >
+                {t('hero.contact')}
+              </a>
+            )}
             <a
               href="#graph"
-              className="px-8 py-4 border border-gray-700 hover:border-green-500 text-gray-300 hover:text-green-400 rounded-full transition-all duration-300 font-medium"
+              className={`px-8 sm:px-10 py-3 text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
             >
-              探索更多
+              {t('hero.explore')}
             </a>
           </div>
         </div>
       </div>
-      
-      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+
+      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <svg className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-700' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
     </section>
@@ -90,52 +100,54 @@ function HeroSection() {
 
 function LifeAttitudeSection() {
   const isVisible = useScrollAnimation('attitude')
-  const attitudes = [
+  const { t, language } = useLanguage()
+
+  const attitudes = language === 'zh' ? [
     { word: '专注', desc: '用心做好每一件事' },
     { word: '探索', desc: '对新事物充满好奇心' },
     { word: '创造', desc: '用代码创造价值' },
     { word: '热爱', desc: '享受技术带来的乐趣' }
+  ] : [
+    { word: 'Focus', desc: 'Doing things with care' },
+    { word: 'Explore', desc: 'Curious about new things' },
+    { word: 'Create', desc: 'Creating value with code' },
+    { word: 'Love', desc: 'Enjoying the joy of tech' }
   ]
 
   return (
     <section
       id="attitude"
-      className="py-24 sm:py-32 px-6 bg-white dark:bg-black"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div
-          className={`text-center mb-16 transition-all duration-1000 transform ${
+          className={`text-center mb-12 sm:mb-16 md:mb-20 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            生活态度
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('life.attitude.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-            我的人生关键词
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white">
+            {t('life.attitude.subtitle')}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-8 sm:gap-12">
           {attitudes.map((item, index) => (
             <div
               key={item.word}
-              className={`group text-center p-8 rounded-2xl transition-all duration-700 transform ${
+              className={`text-center transition-all duration-700 transform ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-12'
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-800 group-hover:border-green-500/50 group-hover:bg-green-50 dark:group-hover:bg-green-950/30 transition-all duration-300">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                  {index + 1}
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+              <h3 className="text-lg sm:text-xl font-light tracking-wide text-gray-900 dark:text-white mb-2 sm:mb-3">
                 {item.word}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
                 {item.desc}
               </p>
             </div>
@@ -149,6 +161,8 @@ function LifeAttitudeSection() {
 function AbilityCloudSection() {
   const isVisible = useScrollAnimation('ability-cloud')
   const [abilities, setAbilities] = useState<Keyword[]>([])
+  const { t } = useLanguage()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const projects = getAllProjects()
@@ -169,17 +183,37 @@ function AbilityCloudSection() {
     const abilityList: Keyword[] = Array.from(tagCounts.entries()).map(([name, count]) => ({
       name,
       count,
-      type: 'ability'
+      type: 'ability' as const
     }))
     abilityList.sort((a, b) => b.count - a.count)
     setAbilities(abilityList)
   }, [])
 
   const getSize = (count: number, maxCount: number) => {
-    const minSize = 0.875
-    const maxSize = 2.25
+    const minSize = 0.7
+    const maxSize = 2.0
     const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 0
     return minSize + ratio * (maxSize - minSize)
+  }
+
+  const getColor = (index: number) => {
+    const colors = [
+      'text-gray-400',
+      'text-gray-500',
+      'text-gray-600',
+      'text-gray-400 dark:text-gray-500',
+      'text-gray-500 dark:text-gray-400',
+    ]
+    return colors[index % colors.length]
+  }
+
+  const getRotation = (index: number) => {
+    const rotations = [-15, 0, 15, -10, 10, -5, 5, -20, 20]
+    return rotations[index % rotations.length]
+  }
+
+  const handleClick = (abilityName: string) => {
+    navigate(`/skill/${encodeURIComponent(abilityName)}`)
   }
 
   const maxCount = abilities.length > 0 ? Math.max(...abilities.map(k => k.count)) : 0
@@ -187,23 +221,20 @@ function AbilityCloudSection() {
   return (
     <section
       id="ability-cloud"
-      className="py-24 sm:py-32 px-6 bg-gray-50 dark:bg-gray-950"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
       <div className="max-w-5xl mx-auto">
         <div
-          className={`text-center mb-16 transition-all duration-1000 transform ${
+          className={`text-center mb-10 sm:mb-16 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            内在特质
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('ability.cloud.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            能力云图
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white">
+            {t('ability.cloud.subtitle')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            我的软技能特质
-          </p>
         </div>
 
         <div
@@ -211,24 +242,29 @@ function AbilityCloudSection() {
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 sm:p-12 shadow-sm border border-gray-200 dark:border-gray-800">
-            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4">
-              {abilities.map((ability, index) => {
-                const size = getSize(ability.count, maxCount)
-                return (
-                  <span
-                    key={ability.name}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 cursor-default select-none"
-                    style={{
-                      fontSize: `${size}rem`,
-                      transitionDelay: `${index * 50}ms`
-                    }}
-                  >
-                    {ability.name}
-                  </span>
-                )
-              })}
-            </div>
+          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 sm:gap-x-10 sm:gap-y-4 py-4 sm:py-8">
+            {abilities.map((ability, index) => {
+              const size = getSize(ability.count, maxCount)
+              const rotation = getRotation(index)
+              const isRotated = Math.abs(rotation) > 5
+
+              return (
+                <span
+                  key={ability.name}
+                  onClick={() => handleClick(ability.name)}
+                  className={`cursor-pointer select-none transition-all duration-300 hover:text-gray-900 dark:hover:text-white ${getColor(index)}`}
+                  style={{
+                    fontSize: `${size}rem`,
+                    transform: `rotate(${rotation}deg)`,
+                    display: 'inline-block',
+                    padding: isRotated ? '0.2rem 0.4rem' : '0.1rem 0.2rem',
+                    transitionDelay: `${index * 40}ms`
+                  }}
+                >
+                  {ability.name}
+                </span>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -238,72 +274,56 @@ function AbilityCloudSection() {
 
 function ExploreDirectionsSection() {
   const isVisible = useScrollAnimation('explore')
-  const directions = [
-    {
-      title: '前端开发',
-      desc: 'React、Vue、现代Web技术',
-      icon: '🎨'
-    },
-    {
-      title: '后端架构',
-      desc: 'Node.js、Go、系统设计',
-      icon: '⚙️'
-    },
-    {
-      title: '人工智能',
-      desc: '机器学习、深度学习应用',
-      icon: '🤖'
-    },
-    {
-      title: '产品设计',
-      desc: '用户体验、产品思维',
-      icon: '✨'
-    }
+  const { t, language } = useLanguage()
+
+  const directions = language === 'zh' ? [
+    { title: '前端', desc: 'React, Vue, 现代 Web' },
+    { title: '后端', desc: 'Node.js, Go, 架构设计' },
+    { title: 'AI', desc: '机器学习, 深度学习' },
+    { title: '设计', desc: '用户体验, 产品设计' }
+  ] : [
+    { title: 'Frontend', desc: 'React, Vue, Modern Web' },
+    { title: 'Backend', desc: 'Node.js, Go, Architecture' },
+    { title: 'AI', desc: 'Machine Learning, Deep Learning' },
+    { title: 'Design', desc: 'User Experience, Product' }
   ]
 
   return (
     <section
       id="explore"
-      className="py-24 sm:py-32 px-6 bg-white dark:bg-black"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div
-          className={`text-center mb-16 transition-all duration-1000 transform ${
+          className={`text-center mb-12 sm:mb-16 md:mb-20 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            探索方向
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('explore.directions.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-            我在做什么
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white">
+            {t('explore.directions.subtitle')}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-8 sm:gap-12">
           {directions.map((item, index) => (
             <div
               key={item.title}
-              className={`group transition-all duration-700 transform ${
+              className={`text-center transition-all duration-700 transform ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-12'
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
-              <div className="relative h-48 sm:h-56 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-800 group-hover:border-green-500/50 transition-all duration-300">
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-                  <span className="text-4xl sm:text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
+              <h3 className="text-lg sm:text-xl font-light tracking-wide text-gray-900 dark:text-white mb-2">
+                {item.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -315,6 +335,9 @@ function ExploreDirectionsSection() {
 function SkillCloudSection() {
   const isVisible = useScrollAnimation('skill-cloud')
   const [skills, setSkills] = useState<Keyword[]>([])
+  const { theme } = useTheme()
+  const { t } = useLanguage()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const projects = getAllProjects()
@@ -335,17 +358,45 @@ function SkillCloudSection() {
     const skillList: Keyword[] = Array.from(tagCounts.entries()).map(([name, count]) => ({
       name,
       count,
-      type: 'skill'
+      type: 'skill' as const
     }))
     skillList.sort((a, b) => b.count - a.count)
     setSkills(skillList)
   }, [])
 
   const getSize = (count: number, maxCount: number) => {
-    const minSize = 0.875
-    const maxSize = 2.5
+    const minSize = 0.7
+    const maxSize = 2.25
     const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 0
     return minSize + ratio * (maxSize - minSize)
+  }
+
+  const getColor = (index: number, theme: string) => {
+    const lightColors = [
+      'text-gray-500',
+      'text-gray-600',
+      'text-gray-700',
+      'text-gray-400',
+      'text-gray-500',
+    ]
+    const darkColors = [
+      'text-gray-400',
+      'text-gray-500',
+      'text-gray-300',
+      'text-gray-400',
+      'text-gray-500',
+    ]
+    const colors = theme === 'dark' ? darkColors : lightColors
+    return colors[index % colors.length]
+  }
+
+  const getRotation = (index: number) => {
+    const rotations = [-12, 0, 12, -8, 8, -3, 3, -18, 18, -6, 6]
+    return rotations[index % rotations.length]
+  }
+
+  const handleClick = (skillName: string) => {
+    navigate(`/skill/${encodeURIComponent(skillName)}`)
   }
 
   const maxCount = skills.length > 0 ? Math.max(...skills.map(k => k.count)) : 0
@@ -353,48 +404,50 @@ function SkillCloudSection() {
   return (
     <section
       id="skill-cloud"
-      className="py-24 sm:py-32 px-6 bg-gray-50 dark:bg-gray-950"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div
-          className={`text-center mb-16 transition-all duration-1000 transform ${
+          className={`text-center mb-10 sm:mb-16 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            技术栈
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('skill.cloud.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            技能云图
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white">
+            {t('skill.cloud.subtitle')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            我掌握的技术
-          </p>
         </div>
 
         <div
-          className={`transition-all duration-1000 transform ${
+          className={`relative transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 sm:p-12 shadow-sm border border-gray-200 dark:border-gray-800">
-            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4">
-              {skills.map((skill, index) => {
-                const size = getSize(skill.count, maxCount)
-                return (
-                  <span
-                    key={skill.name}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-500/20 dark:border-green-500/30 text-green-700 dark:text-green-400 cursor-default select-none"
-                    style={{
-                      fontSize: `${size}rem`,
-                      transitionDelay: `${index * 40}ms`
-                    }}
-                  >
-                    {skill.name}
-                  </span>
-                )
-              })}
-            </div>
+          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 sm:gap-x-10 sm:gap-y-4 py-4 sm:py-8">
+            {skills.map((skill, index) => {
+              const size = getSize(skill.count, maxCount)
+              const rotation = getRotation(index)
+              const isRotated = Math.abs(rotation) > 5
+
+              return (
+                <span
+                  key={skill.name}
+                  onClick={() => handleClick(skill.name)}
+                  className={`cursor-pointer select-none transition-all duration-300 hover:text-gray-900 dark:hover:text-white ${getColor(index, theme)}`}
+                  style={{
+                    fontSize: `${size}rem`,
+                    transform: `rotate(${rotation}deg)`,
+                    display: 'inline-block',
+                    padding: isRotated ? '0.2rem 0.4rem' : '0.1rem 0.2rem',
+                    transitionDelay: `${index * 30}ms`
+                  }}
+                >
+                  {skill.name}
+                </span>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -404,27 +457,25 @@ function SkillCloudSection() {
 
 function KnowledgeGraphSection() {
   const isVisible = useScrollAnimation('graph')
+  const { t } = useLanguage()
 
   return (
     <section
       id="graph"
-      className="py-24 sm:py-32 px-6 bg-white dark:bg-black"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div
-          className={`text-center mb-12 transition-all duration-1000 transform ${
+          className={`text-center mb-10 sm:mb-16 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            知识网络
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('knowledge.graph.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            知识图谱
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white">
+            {t('knowledge.graph.subtitle')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            点击节点查看项目详情
-          </p>
         </div>
 
         <div
@@ -432,8 +483,8 @@ function KnowledgeGraphSection() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800">
-            <KnowledgeGraph height={580} />
+          <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
+            <KnowledgeGraph height={400} />
           </div>
         </div>
       </div>
@@ -443,69 +494,56 @@ function KnowledgeGraphSection() {
 
 function ContactSection() {
   const isVisible = useScrollAnimation('contact')
+  const { t } = useLanguage()
 
   return (
     <section
       id="contact"
-      className="py-24 sm:py-32 px-6 bg-gray-50 dark:bg-gray-950"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-2xl mx-auto text-center">
         <div
           className={`transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-green-600 dark:text-green-400 text-sm tracking-widest uppercase mb-4 font-medium">
-            联系方式
+          <p className="text-xs tracking-[0.3em] uppercase mb-4 sm:mb-6 text-gray-400">
+            {t('contact.title')}
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
-            联系我
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-8 sm:mb-12">
+            {t('contact.subtitle')}
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <a
-              href={`mailto:${config.email}`}
-              className="group p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-500/50 transition-all duration-300"
-            >
-              <div className="text-3xl mb-4">📧</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Email</p>
-              <p className="text-gray-900 dark:text-white font-medium group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mb-12 sm:mb-16">
+            {config.email && (
+              <a
+                href={`mailto:${config.email}`}
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm tracking-wide"
+              >
                 {config.email}
-              </p>
-            </a>
+              </a>
+            )}
 
-            <a
-              href={config.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-500/50 transition-all duration-300"
-            >
-              <div className="text-3xl mb-4">🐙</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">GitHub</p>
-              <p className="text-gray-900 dark:text-white font-medium group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+            {config.github && (
+              <a
+                href={config.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm tracking-wide"
+              >
                 {config.github.split('/').pop()}
-              </p>
-            </a>
+              </a>
+            )}
 
-            <div className="group p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-500/50 transition-all duration-300">
-              <div className="text-3xl mb-4">📱</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Phone</p>
-              <p className="text-gray-900 dark:text-white font-medium group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                {config.phone}
-              </p>
-            </div>
-
-            <div className="group p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-500/50 transition-all duration-300">
-              <div className="text-3xl mb-4">💬</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">WeChat</p>
-              <p className="text-gray-900 dark:text-white font-medium group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+            {config.wechat && (
+              <span className="text-gray-500 dark:text-gray-400 text-sm tracking-wide">
                 {config.wechat}
-              </p>
-            </div>
+              </span>
+            )}
           </div>
 
-          <p className="text-gray-400 dark:text-gray-500 text-sm">
-            期待与你合作 🤝
+          <p className="text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
+            {t('contact.cta')}
           </p>
         </div>
       </div>
@@ -514,8 +552,10 @@ function ContactSection() {
 }
 
 export default function Home() {
+  const { theme } = useTheme()
+
   return (
-    <div className="min-h-screen bg-white dark:bg-black overflow-x-hidden">
+    <div className={`min-h-screen overflow-x-hidden ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
       <Navbar />
       <main>
         <HeroSection />

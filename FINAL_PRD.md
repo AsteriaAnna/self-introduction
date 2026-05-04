@@ -223,7 +223,8 @@ interface Project {
   id: string;
   title: string;
   description: string;
-  tags: string[];
+  skillTags: string[];      // 技术标签：React, TypeScript 等
+  abilityTags: string[];   // 能力标签：团队协作, 学习能力 等
   link?: string;
   image?: string;
   date: string;
@@ -238,7 +239,8 @@ interface Experience {
   role: string;
   period: string;
   description: string;
-  tags: string[];
+  skillTags: string[];      // 技术标签：React, Node.js 等
+  abilityTags: string[];   // 能力标签：团队管理, 沟通 等
   location?: string;
   content: string;  // Markdown内容
 }
@@ -247,8 +249,9 @@ interface Experience {
 interface GraphNode {
   id: string;
   label: string;
-  type: 'skill' | 'project' | 'experience';
+  type: 'skill' | 'ability' | 'project' | 'experience';
   weight: number;  // 关联强度
+  originalId?: string;  // 原始项目/经历ID，用于跳转
 }
 
 // 知识图谱边

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '@components/extensions/Theme'
+import { LanguageProvider } from '@components/extensions/Language'
 import { ErrorProvider } from '@components/common/ErrorBoundary'
 import { ErrorBoundary } from '@components/common/ErrorBoundary'
 import { LogProvider } from '@components/common/LogProvider'
@@ -20,21 +21,21 @@ function App() {
   return (
     <LogProvider>
       <ErrorProvider>
-        <ErrorBoundary>
-          <ThemeProvider>
+        <ThemeProvider>
+          <LanguageProvider>
             <GlobalErrorHandler />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/skill/:label" element={<SkillDetail />} />
-                <Route path="/experience/:id" element={<ExperienceDetail />} />
-                <Route path="/project/:id" element={<ProjectDetail />} />
-                <Route path="/match-result" element={<MatchResult />} />
+                <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
+                <Route path="/skill/:label" element={<ErrorBoundary><SkillDetail /></ErrorBoundary>} />
+                <Route path="/experience/:id" element={<ErrorBoundary><ExperienceDetail /></ErrorBoundary>} />
+                <Route path="/project/:id" element={<ErrorBoundary><ProjectDetail /></ErrorBoundary>} />
+                <Route path="/match-result" element={<ErrorBoundary><MatchResult /></ErrorBoundary>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </ThemeProvider>
-        </ErrorBoundary>
+          </LanguageProvider>
+        </ThemeProvider>
       </ErrorProvider>
     </LogProvider>
   )
