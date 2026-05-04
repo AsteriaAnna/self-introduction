@@ -29,6 +29,12 @@ export function Navbar() {
                 首页
               </button>
               <button
+                onClick={() => scrollToSection('graph-preview')}
+                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
+              >
+                知识图谱
+              </button>
+              <button
                 onClick={() => scrollToSection('projects')}
                 className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
               >
@@ -40,12 +46,6 @@ export function Navbar() {
               >
                 经历
               </button>
-              <Link
-                to="/graph"
-                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
-              >
-                知识图谱
-              </Link>
               <button
                 onClick={() => scrollToSection('contact')}
                 className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
@@ -54,20 +54,12 @@ export function Navbar() {
               </button>
             </>
           ) : (
-            <>
-              <Link
-                to="/"
-                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
-              >
-                返回首页
-              </Link>
-              <Link
-                to="/graph"
-                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
-              >
-                知识图谱
-              </Link>
-            </>
+            <Link
+              to="/"
+              className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium"
+            >
+              返回首页
+            </Link>
           )}
           <ThemeToggle />
         </div>

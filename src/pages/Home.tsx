@@ -87,40 +87,16 @@ function GraphPreview() {
       }`}
     >
       <StarField />
-      
+
       <div className="relative z-10 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">知识图谱</h2>
-        
-        <div className="relative">
-          <KnowledgeGraph isPreview={true} highlightedLabels={['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管']} />
-        </div>
+        <h2 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-gray-900 dark:from-white to-green-600 dark:to-green-500 bg-clip-text text-transparent">
+          知识图谱
+        </h2>
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+          点击节点查看技能、项目或经历的详情
+        </p>
 
-        <div className="mt-6 text-center">
-          <Link
-            to="/graph"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-green-600 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-green-700 transition-all duration-300 font-medium shadow-xl hover:shadow-2xl"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            查看完整知识图谱
-          </Link>
-        </div>
-
-        <div className="mt-6 flex justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span>技能</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span>项目</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-            <span>经历</span>
-          </div>
-        </div>
+        <KnowledgeGraph />
       </div>
     </section>
   )
@@ -146,7 +122,7 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        
+
         <GraphPreview />
 
         <section id="jdmatcher" className="py-12 px-4 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
