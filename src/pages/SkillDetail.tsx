@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Project, Experience } from '@/types'
-import { getProjects } from '@/data/projects'
-import { getExperiences } from '@/data/experiences'
+import { getAllProjects, getAllExperiences } from '@/utils/markdownParser'
 
 function Section({ id, title, children, isLight = true }: {
   id: string
@@ -80,7 +79,7 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
 
         {project.link && (
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-80">
             <div className="flex items-center gap-2 text-green-600 dark:text-green-500 text-sm font-medium">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -132,7 +131,7 @@ function TimelineItem({ experience }: { experience: Experience }) {
           ))}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-80">
           <div className="flex items-center gap-2 text-green-600 dark:text-green-500 text-sm font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -158,8 +157,8 @@ export default function SkillDetail() {
       return
     }
 
-    const projects = getProjects()
-    const experiences = getExperiences()
+    const projects = getAllProjects()
+    const experiences = getAllExperiences()
 
     const filteredProjects = projects.filter(project =>
       project.tags.includes(label)
@@ -230,7 +229,7 @@ export default function SkillDetail() {
         ) : (
           <div className="min-h-[60vh] flex items-center justify-center">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-80 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
