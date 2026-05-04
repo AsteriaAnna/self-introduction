@@ -3,6 +3,7 @@ import { Navbar } from '@components/common/Layout'
 import { Hero } from '@components/core/Hero'
 import { ProjectList } from '@components/core/ProjectList'
 import { ExperienceTimeline } from '@components/core/Experience'
+import { KeywordsCloud } from '@components/extensions/Keywords'
 
 function Section({ id, title, children, isLight = true }: {
   id: string
@@ -50,17 +51,50 @@ function Section({ id, title, children, isLight = true }: {
 }
 
 export default function Home() {
+  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null)
+
+  const handleKeywordClick = (keyword: string) => {
+    if (selectedKeyword === keyword) {
+      setSelectedKeyword(null)
+    } else {
+      setSelectedKeyword(keyword)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
       <Navbar />
       <main>
         <Hero />
+
+        <section id="keywords" className="py-12 px-4 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">技能标签</h2>
+            <KeywordsCloud
+              selectedKeyword={selectedKeyword}
+              onKeywordClick={handleKeywordClick}
+            />
+            {selectedKeyword && (
+              <div className="text-center mt-4">
+                <button
+                  onClick={() => setSelectedKeyword(null)}
+                  className="text-sm text-green-600 dark:text-green-500 hover:underline"
+                >
+                  清除筛选
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
         <Section id="projects" title="项目展示" isLight={false}>
-          <ProjectList />
+          <ProjectList filterKeyword={selectedKeyword} />
         </Section>
+
         <Section id="experience" title="工作经历" isLight={true}>
-          <ExperienceTimeline />
+          <ExperienceTimeline filterKeyword={selectedKeyword} />
         </Section>
+
         <Section id="contact" title="联系我" isLight={false}>
           <p className="text-gray-500 dark:text-gray-400 text-center">
             联系方式已在首页展示

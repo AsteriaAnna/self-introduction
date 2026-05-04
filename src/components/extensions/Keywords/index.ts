@@ -1,2 +1,2 @@
-export { default as KeywordsCloud } from './KeywordsCloud'
-export { default as KeywordTag } from './KeywordTag'
+export { KeywordsCloud } from './KeywordsCloud'
+export { KeywordTag } from './KeywordTag'
