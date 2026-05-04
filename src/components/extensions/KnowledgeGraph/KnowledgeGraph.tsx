@@ -85,12 +85,12 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
     // 根据屏幕大小计算缩放比例
     const screenWidth = window.innerWidth
-    let scale = 1
-    let fontSize = '11px'
-    let maxLabelLength = 18
-    let linkDistance = 120
-    let chargeStrength = -200
-    let collisionRadius = 60
+    let scale = 1.1 // 电脑端稍微放大一点
+    let fontSize = '12px'
+    let maxLabelLength = 20
+    let linkDistance = 130
+    let chargeStrength = -250
+    let collisionRadius = 70
     
     if (screenWidth < 640) {
       scale = 0.7
@@ -100,19 +100,19 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       chargeStrength = -120
       collisionRadius = 40
     } else if (screenWidth < 768) {
-      scale = 0.8
+      scale = 0.85
       fontSize = '10px'
       maxLabelLength = 14
       linkDistance = 100
       chargeStrength = -160
       collisionRadius = 50
     } else if (screenWidth < 1024) {
-      scale = 0.9
+      scale = 0.95
       fontSize = '11px'
       maxLabelLength = 16
-      linkDistance = 110
-      chargeStrength = -180
-      collisionRadius = 55
+      linkDistance = 120
+      chargeStrength = -200
+      collisionRadius = 60
     }
 
     svg.selectAll('*').remove()

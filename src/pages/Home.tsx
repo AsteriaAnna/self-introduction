@@ -74,7 +74,7 @@ function HeroSection() {
             {config.email && (
               <a
                 href={`mailto:${config.email}`}
-                className={`relative inline-block px-8 sm:px-10 py-2 text-xs sm:text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                className={`relative inline-block px-8 sm:px-12 py-3 text-sm sm:text-base tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
               >
                 {t('hero.contact')}
                 <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} hover:w-full`} />
@@ -83,7 +83,7 @@ function HeroSection() {
             )}
             <a
               href="#graph"
-              className={`relative inline-block px-8 sm:px-10 py-2 text-xs sm:text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`relative inline-block px-8 sm:px-12 py-3 text-sm sm:text-base tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
             >
               {t('hero.explore')}
               <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} hover:w-full`} />
