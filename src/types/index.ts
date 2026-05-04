@@ -62,5 +62,7 @@ export interface SiteConfig {
   email?: string;
   github?: string;
   linkedin?: string;
+  phone?: string;
+  wechat?: string;
   skills?: string[];
 }
