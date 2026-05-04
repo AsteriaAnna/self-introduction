@@ -1,2 +1,2 @@
-export { default as ProjectList } from './ProjectList'
-export { default as ProjectCard } from './ProjectCard'
+export { ProjectList } from './ProjectList'
+export { ProjectCard } from './ProjectCard'

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navbar } from '@components/common/Layout'
 import { Hero } from '@components/core/Hero'
+import { ProjectList } from '@components/core/ProjectList'
+import { ExperienceTimeline } from '@components/core/Experience'
 
 function Section({ id, title, children, isLight = true }: {
   id: string
@@ -40,7 +42,7 @@ function Section({ id, title, children, isLight = true }: {
       } ${isLight ? 'bg-white dark:bg-gray-950' : 'bg-gray-50 dark:bg-gray-900'}`}
     >
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">{title}</h2>
+        <h2 className="text-3xl font-bold mb-12 text-center">{title}</h2>
         {children}
       </div>
     </section>
@@ -54,14 +56,10 @@ export default function Home() {
       <main>
         <Hero />
         <Section id="projects" title="项目展示" isLight={false}>
-          <p className="text-gray-500 dark:text-gray-400 text-center">
-            项目列表组件开发中...
-          </p>
+          <ProjectList />
         </Section>
         <Section id="experience" title="工作经历" isLight={true}>
-          <p className="text-gray-500 dark:text-gray-400 text-center">
-            经历时间线组件开发中...
-          </p>
+          <ExperienceTimeline />
         </Section>
         <Section id="contact" title="联系我" isLight={false}>
           <p className="text-gray-500 dark:text-gray-400 text-center">
