@@ -468,7 +468,7 @@ function KnowledgeGraphSection() {
       id="graph"
       className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl lg:max-w-7xl mx-auto">
         <div
           className={`text-center mb-10 sm:mb-16 transition-all duration-1000 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
@@ -488,7 +488,7 @@ function KnowledgeGraphSection() {
           }`}
         >
           <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
-            <KnowledgeGraph height={500} />
+            <KnowledgeGraph height={600} />
           </div>
         </div>
       </div>
