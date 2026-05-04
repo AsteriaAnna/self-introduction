@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import { Link } from 'react-router-dom'
 import { Experience } from '@/types'
 
 interface TimelineItemProps {
@@ -9,8 +8,6 @@ interface TimelineItemProps {
 }
 
 export function TimelineItem({ experience, isLast = false, isHighlighted = false }: TimelineItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-
   return (
     <div className="relative pl-8 pb-8">
       {!isLast && (
@@ -25,10 +22,10 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
       />
 
       <div
-        className={`p-6 rounded-lg border transition-all ${
+        className={`p-6 rounded-lg border transition-all hover:shadow-lg ${
           isHighlighted
             ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-            : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'
+            : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-green-500 dark:hover:border-green-600'
         }`}
       >
         <div className="flex items-start justify-between mb-3">
@@ -67,31 +64,15 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
           ))}
         </div>
 
-        {experience.content && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
-          >
-            {isExpanded ? '收起详情' : '查看详情'}
-            <svg
-              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        )}
-
-        {isExpanded && experience.content && (
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{experience.content}</ReactMarkdown>
-            </div>
-          </div>
-        )}
+        <Link
+          to={`/experience/${experience.id}`}
+          className="inline-flex items-center gap-2 text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
+        >
+          查看详情
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
       </div>
     </div>
   )
