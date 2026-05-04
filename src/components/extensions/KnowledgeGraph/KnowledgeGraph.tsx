@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as d3 from 'd3'
 import { GraphNode, GraphEdge } from '@/types'
-import { buildGraphData, getNodeColor, getNodeSize } from '@/utils/graphBuilder'
+import { buildGraphData, getNodeSize } from '@/utils/graphBuilder'
 
 interface KnowledgeGraphProps {
   isPreview?: boolean
@@ -15,7 +15,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null)
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
   const navigate = useNavigate()
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
 
@@ -31,40 +31,19 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   useEffect(() => {
     const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
     setIsDark(darkMode)
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDark(e.matches)
-    }
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        e.preventDefault()
-        setIsDark(prev => !prev)
-      }
-    }
-    window.addEventListener('keydown', handleKeydown)
-    return () => window.removeEventListener('keydown', handleKeydown)
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
     try {
-      setSelectedNodeId(node.id)
-      setTimeout(() => {
-        if (node.type === 'project' || node.type === 'experience') {
-          if (!node.originalId) {
-            console.warn('Node has no originalId:', node)
-            return
-          }
-          navigate(`/${node.type}/${node.originalId}`)
-        } else if (node.type === 'skill' || node.type === 'ability') {
-          navigate(`/skill/${encodeURIComponent(node.label)}`)
+      if (node.type === 'project' || node.type === 'experience') {
+        if (!node.originalId) {
+          console.warn('Node has no originalId:', node)
+          return
         }
-      }, 300)
+        navigate(`/${node.type}/${node.originalId}`)
+      } else if (node.type === 'skill' || node.type === 'ability') {
+        navigate(`/skill/${encodeURIComponent(node.label)}`)
+      }
     } catch (err) {
       console.error('Navigation error:', err)
     }
@@ -91,11 +70,14 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
     const isHighlighted = (nodeLabel: string) => highlightedLabels.includes(nodeLabel)
 
+    // 优化力导向参数，让所有节点都能被看到
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(120))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-300))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(100))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(-200))
       .force('center', d3.forceCenter(width / 2, containerHeight / 2))
-      .force('collide', d3.forceCollide<GraphNode>().radius(45))
+      .force('collision', d3.forceCollide<GraphNode>().radius(40))
+      .force('x', d3.forceX(width / 2).strength(0.05))
+      .force('y', d3.forceY(containerHeight / 2).strength(0.05))
     
     simulationRef.current = simulation
 
@@ -103,7 +85,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .selectAll('line')
       .data(edges)
       .enter().append('line')
-      .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.3)')
+      .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(148, 163, 184, 0.28)')
       .attr('stroke-width', 1)
       .attr('stroke-linecap', 'round')
 
@@ -121,13 +103,13 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     node.each(function(d: GraphNode) {
       const g = d3.select(this)
       const r = getNodeSize(d.weight)
-      const isSelected = selectedNodeId === d.id
+      const isHovered = hoveredNodeId === d.id
 
       g.append('circle')
         .attr('r', r)
-        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(148, 163, 184, 0.12)')
-        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.25)' : 'rgba(148, 163, 184, 0.35)')
-        .attr('stroke-width', 1.5)
+        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.06)' : 'rgba(148, 163, 184, 0.1)')
+        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.3)')
+        .attr('stroke-width', 1.2)
         .attr('class', 'node-circle')
 
       g.append('text')
@@ -148,80 +130,47 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     })
 
     node.on('mouseover', function(event, d) {
-      const isSelected = selectedNodeId === d.id
+      setHoveredNodeId(d.id)
       const color = isDark ? '#38bdf8' : '#2563eb'
 
       d3.select(this).select('.node-circle')
         .transition()
-        .duration(150)
-        .attr('fill', isSelected ? (isDark ? 'rgba(56, 189, 248, 0.2)' : 'rgba(37, 99, 235, 0.15)') : (isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.18)'))
-        .attr('stroke', isSelected ? color : (isDark ? 'rgba(148, 163, 184, 0.35)' : 'rgba(148, 163, 184, 0.45)'))
+        .duration(120)
+        .attr('fill', isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.12)')
+        .attr('stroke', color)
+        .attr('stroke-width', 1.8)
 
       d3.select(this).select('.node-label')
         .transition()
-        .duration(150)
-        .attr('fill', isSelected ? color : (isDark ? '#cbd5e1' : '#475569'))
+        .duration(120)
+        .attr('fill', color)
+        .attr('font-weight', 600)
     })
 
     node.on('mouseout', function(event, d) {
-      const isSelected = selectedNodeId === d.id
-      const color = isDark ? '#38bdf8' : '#2563eb'
+      setHoveredNodeId(null)
 
       d3.select(this).select('.node-circle')
         .transition()
-        .duration(150)
-        .attr('fill', isSelected ? (isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.12)') : (isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(148, 163, 184, 0.12)'))
-        .attr('stroke', isSelected ? color : (isDark ? 'rgba(148, 163, 184, 0.25)' : 'rgba(148, 163, 184, 0.35)'))
+        .duration(120)
+        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.06)' : 'rgba(148, 163, 184, 0.1)')
+        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.3)')
+        .attr('stroke-width', 1.2)
 
       d3.select(this).select('.node-label')
         .transition()
-        .duration(150)
-        .attr('fill', isSelected ? color : (isDark ? '#94a3b8' : '#64748b'))
+        .duration(120)
+        .attr('fill', isDark ? '#94a3b8' : '#64748b')
+        .attr('font-weight', 500)
     })
 
     node.on('click', function(event, d) {
       event.stopPropagation()
-      
-      const color = isDark ? '#38bdf8' : '#2563eb'
-
-      d3.select(this).select('.node-circle')
-        .transition()
-        .duration(200)
-        .attr('fill', isDark ? 'rgba(56, 189, 248, 0.2)' : 'rgba(37, 99, 235, 0.15)')
-        .attr('stroke', color)
-        .attr('stroke-width', 2)
-
-      d3.select(this).select('.node-label')
-        .transition()
-        .duration(200)
-        .attr('fill', color)
-        .attr('font-weight', 600)
-
       handleNodeClick(d)
     })
 
-    svg.on('click', function(event) {
-      if ((event.target as SVGElement).tagName === 'svg') {
-        setSelectedNodeId(null)
-        node.each(function(d) {
-          d3.select(this).select('.node-circle')
-            .transition()
-            .duration(150)
-            .attr('fill', isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(148, 163, 184, 0.12)')
-            .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.25)' : 'rgba(148, 163, 184, 0.35)')
-            .attr('stroke-width', 1.5)
-
-          d3.select(this).select('.node-label')
-            .transition()
-            .duration(150)
-            .attr('fill', isDark ? '#94a3b8' : '#64748b')
-            .attr('font-weight', 500)
-        })
-      }
-    })
-
     function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
-      if (!event.active) simulation.alphaTarget(0.15).restart()
+      if (!event.active) simulation.alphaTarget(0.1).restart()
       event.subject.fx = event.x
       event.subject.fy = event.y
     }
@@ -254,7 +203,9 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       if (newWidth > 0 && newHeight > 0) {
         svg.attr('width', newWidth).attr('height', newHeight)
         simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
-        simulation.alpha(0.15).restart()
+        simulation.force('x', d3.forceX(newWidth / 2).strength(0.05))
+        simulation.force('y', d3.forceY(newHeight / 2).strength(0.05))
+        simulation.alpha(0.1).restart()
       }
     }
 
@@ -264,32 +215,23 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       window.removeEventListener('resize', handleResize)
       simulation.stop()
     }
-  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels, height, selectedNodeId])
+  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels, height, hoveredNodeId])
 
   if (!graphData) {
     return (
-      <div className="w-full flex items-center justify-center" style={{ height: `${height}px`, background: isDark ? '#0f1117' : '#f8fafc' }}>
+      <div className="w-full flex items-center justify-center" style={{ height: `${height}px` }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-800 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p style={{ color: isDark ? '#64748b' : '#94a3b8' }}>加载中...</p>
+          <div className="w-10 h-10 border-3 border-gray-200 dark:border-gray-800 border-t-blue-400 rounded-full animate-spin mx-auto mb-3"></div>
+          <p style={{ color: isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(148, 163, 184, 0.7)' }}>加载中...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div 
-      className="relative w-full h-full"
-      style={{ background: isDark ? '#0f1117' : '#f8fafc', transition: 'background 0.4s ease' }}
-    >
+    <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full" style={{ height: `${height}px`, cursor: 'grab' }}>
         <svg ref={svgRef} className="w-full h-full" />
-      </div>
-
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 text-xs" style={{ pointerEvents: 'none' }}>
-        <span style={{ color: isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(148, 163, 184, 0.7)' }}>按空格键切换主题</span>
-        <span style={{ color: isDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(148, 163, 184, 0.4)' }}>•</span>
-        <span style={{ color: isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(148, 163, 184, 0.7)' }}>点击节点查看详情</span>
       </div>
     </div>
   )

@@ -5,7 +5,6 @@ import { ProjectList } from '@components/core/ProjectList'
 import { ExperienceTimeline } from '@components/core/Experience'
 import { KeywordsCloud } from '@components/extensions/Keywords'
 import { JDMatcher } from '@components/extensions/JDMatcher'
-import { StarField } from '@components/core/Hero/StarField'
 import { KnowledgeGraph } from '@components/extensions/KnowledgeGraph/KnowledgeGraph'
 
 function Section({ id, title, children, isLight = true }: {
@@ -84,9 +83,9 @@ function GraphPreview() {
       if (window.innerWidth < 640) {
         setGraphHeight(400)
       } else if (window.innerWidth < 1024) {
-        setGraphHeight(450)
+        setGraphHeight(480)
       } else {
-        setGraphHeight(550)
+        setGraphHeight(580)
       }
     }
 
@@ -98,21 +97,12 @@ function GraphPreview() {
   return (
     <section
       id="graph-preview"
-      className={`relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-gray-100 dark:to-gray-950 transition-all duration-1000 ${
+      className={`py-12 px-4 sm:px-6 lg:px-8 transition-all duration-1000 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
-      style={{ minHeight: `${graphHeight + 200}px` }}
     >
-      <StarField />
-
-      <div className="relative z-10 max-w-6xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center bg-gradient-to-r from-gray-900 dark:from-white to-green-600 dark:to-green-500 bg-clip-text text-transparent">
-          知识图谱
-        </h2>
-        <p className="text-center text-gray-500 dark:text-gray-400 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
-          点击节点查看技能、项目或经历的详情
-        </p>
-
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">知识图谱</h2>
         <KnowledgeGraph height={graphHeight} />
       </div>
     </section>
