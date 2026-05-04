@@ -23,8 +23,11 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const [isDark, setIsDark] = useState(false)
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null)
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
+  const [currentTransform, setCurrentTransform] = useState<d3.ZoomTransform>(d3.zoomIdentity)
   const navigate = useNavigate()
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null)
+  const gRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null)
 
   useEffect(() => {
     try {
@@ -48,19 +51,31 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
-    if (!node.originalId) {
-      console.warn('Node has no originalId:', node)
-      return
-    }
-    
-    if (node.type === 'project') {
-      navigate(`/project/${node.originalId}`)
-    } else if (node.type === 'experience') {
-      navigate(`/experience/${node.originalId}`)
-    } else if (node.type === 'skill' || node.type === 'ability') {
-      navigate(`/skill/${encodeURIComponent(node.label)}`)
+    try {
+      if (node.type === 'project' || node.type === 'experience') {
+        if (!node.originalId) {
+          console.warn('Node has no originalId:', node)
+          return
+        }
+        navigate(`/${node.type}/${node.originalId}`)
+      } else if (node.type === 'skill' || node.type === 'ability') {
+        navigate(`/skill/${encodeURIComponent(node.label)}`)
+      }
+    } catch (err) {
+      console.error('Navigation error:', err)
     }
   }, [navigate])
+
+  const handleResetView = useCallback(() => {
+    if (zoomRef.current && svgRef.current) {
+      const svg = d3.select(svgRef.current)
+      svg.transition().duration(500).call(
+        zoomRef.current.transform,
+        d3.zoomIdentity
+      )
+      setCurrentTransform(d3.zoomIdentity)
+    }
+  }, [])
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !graphData) return
@@ -82,16 +97,18 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     svg.attr('width', width).attr('height', containerHeight)
 
     const g = svg.append('g').attr('class', 'graph-group')
+    gRef.current = g
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.3, 3])
+      .scaleExtent([0.2, 4])
       .on('zoom', (event) => {
-        if (hoveredNodeId === null) {
-          g.attr('transform', event.transform)
-        }
+        g.attr('transform', event.transform)
+        setCurrentTransform(event.transform)
       })
 
+    zoomRef.current = zoom
     svg.call(zoom)
+    svg.on('dblclick.zoom', null)
 
     svg.append('defs').append('marker')
       .attr('id', 'arrowhead')
@@ -108,10 +125,10 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     const isHighlighted = (nodeLabel: string) => highlightedLabels.includes(nodeLabel)
 
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(120).strength(0.5))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-400))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(100).strength(0.4))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(-300))
       .force('center', d3.forceCenter(width / 2, containerHeight / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 30))
+      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 20))
     
     simulationRef.current = simulation
 
@@ -121,13 +138,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .data(edges)
       .enter().append('line')
       .attr('stroke', isDark ? '#4b5563' : '#d1d5db')
-      .attr('stroke-width', (d) => Math.max(1.5, d.weight))
-      .attr('opacity', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        return sourceHighlighted && targetHighlighted ? 0.8 : 0.2
-      })
-      .attr('marker-end', 'url(#arrowhead)')
+      .attr('stroke-width', (d) => Math.max(1, d.weight))
+      .attr('opacity', 0.6)
 
     const node = g.append('g')
       .attr('class', 'nodes')
@@ -145,33 +157,33 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
         if (isHighlighted(d.label)) {
           return getNodeColor(d.type, isDark)
         }
-        return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
+        return isDark ? 'rgba(107, 114, 128, 0.15)' : 'rgba(156, 163, 175, 0.15)'
       })
       .attr('stroke', (d) => {
         if (isHighlighted(d.label)) {
-          return isDark ? '#ffffff40' : '#00000020'
+          return isDark ? '#ffffff50' : '#00000030'
         }
-        return isDark ? '#ffffff15' : '#00000010'
+        return isDark ? '#ffffff10' : '#00000010'
       })
-      .attr('stroke-width', (d) => isHighlighted(d.label) ? 3 : 1.5)
+      .attr('stroke-width', (d) => isHighlighted(d.label) ? 2 : 1)
       .style('filter', (d) => {
         if (isHighlighted(d.label)) {
-          return isDark ? 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))'
+          return isDark ? 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))' : 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.3))'
         }
         return 'none'
       })
 
     nodeGroup.append('text')
-      .attr('dy', (d) => getNodeSize(d.weight) + 16)
+      .attr('dy', (d) => getNodeSize(d.weight) + 14)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
+      .attr('font-size', '11px')
       .attr('fill', isDark ? '#9ca3af' : '#6b7280')
-      .attr('font-weight', (d) => isHighlighted(d.label) ? 700 : 500)
+      .attr('font-weight', (d) => isHighlighted(d.label) ? 600 : 400)
       .style('pointer-events', 'none')
-      .style('opacity', (d) => isHighlighted(d.label) ? 1 : 0.6)
+      .style('opacity', (d) => isHighlighted(d.label) ? 1 : 0.5)
       .text((d) => {
         const label = d.label
-        if (label.length > 10) return label.substring(0, 10) + '...'
+        if (label.length > 12) return label.substring(0, 12) + '...'
         return label
       })
 
@@ -189,35 +201,36 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       const nodeColor = getNodeColor(d.type, isDark)
       
       nodeSelection.select('circle')
-        .transition().duration(150)
-        .attr('r', getNodeSize(d.weight) * 1.2)
+        .transition().duration(120)
+        .attr('r', getNodeSize(d.weight) * 1.25)
         .attr('fill', nodeColor)
-        .attr('stroke', isDark ? '#ffffff60' : '#00000030')
-        .attr('stroke-width', 3)
-        .style('filter', isDark ? 'drop-shadow(0 0 20px rgba(74, 222, 128, 0.7))' : 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.6))')
+        .attr('stroke', isDark ? '#ffffff70' : '#00000040')
+        .attr('stroke-width', 2.5)
+        .style('filter', isDark ? 'drop-shadow(0 0 18px rgba(74, 222, 128, 0.6))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.5))')
 
       nodeSelection.select('text')
-        .transition().duration(150)
+        .transition().duration(120)
         .attr('font-weight', 700)
         .style('opacity', 1)
         .attr('fill', isDark ? '#e5e7eb' : '#1f2937')
 
-      edge.transition().duration(150)
+      edge.transition().duration(120)
         .attr('opacity', (e: any) => {
-          if (e.source.id === d.id || e.target.id === d.id) return 0.9
-          const sourceHighlighted = isHighlighted(e.source.label)
-          const targetHighlighted = isHighlighted(e.target.label)
-          return sourceHighlighted && targetHighlighted ? 0.5 : 0.1
+          if (e.source.id === d.id || e.target.id === d.id) return 1
+          return 0.15
+        })
+        .attr('stroke-width', (e: any) => {
+          if (e.source.id === d.id || e.target.id === d.id) return 2
+          return 1
         })
 
-      node.transition().duration(150)
+      node.transition().duration(120)
         .style('opacity', (n) => {
           if (n.id === d.id) return 1
           const connected = edges.some(
             (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
           )
-          if (connected) return 0.8
-          return isHighlighted(n.label) ? 0.7 : 0.15
+          return connected ? 0.9 : 0.2
         })
     })
 
@@ -233,42 +246,39 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       const nodeSelection = d3.select(this)
       
       nodeSelection.select('circle')
-        .transition().duration(150)
+        .transition().duration(120)
         .attr('r', getNodeSize(d.weight))
         .attr('fill', () => {
           if (isHighlighted(d.label)) {
             return getNodeColor(d.type, isDark)
           }
-          return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
+          return isDark ? 'rgba(107, 114, 128, 0.15)' : 'rgba(156, 163, 175, 0.15)'
         })
         .attr('stroke', () => {
           if (isHighlighted(d.label)) {
-            return isDark ? '#ffffff40' : '#00000020'
+            return isDark ? '#ffffff50' : '#00000030'
           }
-          return isDark ? '#ffffff15' : '#00000010'
+          return isDark ? '#ffffff10' : '#00000010'
         })
-        .attr('stroke-width', () => isHighlighted(d.label) ? 3 : 1.5)
+        .attr('stroke-width', () => isHighlighted(d.label) ? 2 : 1)
         .style('filter', () => {
           if (isHighlighted(d.label)) {
-            return isDark ? 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))'
+            return isDark ? 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))' : 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.3))'
           }
           return 'none'
         })
 
       nodeSelection.select('text')
-        .transition().duration(150)
-        .attr('font-weight', () => isHighlighted(d.label) ? 700 : 500)
-        .style('opacity', () => isHighlighted(d.label) ? 1 : 0.6)
+        .transition().duration(120)
+        .attr('font-weight', () => isHighlighted(d.label) ? 600 : 400)
+        .style('opacity', () => isHighlighted(d.label) ? 1 : 0.5)
         .attr('fill', isDark ? '#9ca3af' : '#6b7280')
 
-      edge.transition().duration(150)
-        .attr('opacity', (d: any) => {
-          const sourceHighlighted = isHighlighted(d.source.label)
-          const targetHighlighted = isHighlighted(d.target.label)
-          return sourceHighlighted && targetHighlighted ? 0.8 : 0.2
-        })
+      edge.transition().duration(120)
+        .attr('opacity', 0.6)
+        .attr('stroke-width', (d) => Math.max(1, d.weight))
 
-      node.transition().duration(150)
+      node.transition().duration(120)
         .style('opacity', 1)
     })
 
@@ -290,12 +300,12 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     setTimeout(() => {
       nodes.forEach(d => {
         if (isHighlighted(d.label)) {
-          d.fx = width / 2 + (Math.random() - 0.5) * 150
-          d.fy = containerHeight / 2 + (Math.random() - 0.5) * 150
+          d.fx = width / 2 + (Math.random() - 0.5) * 120
+          d.fy = containerHeight / 2 + (Math.random() - 0.5) * 120
         }
       })
-      simulation.alpha(0.3).restart()
-    }, 600)
+      simulation.alpha(0.5).restart()
+    }, 500)
 
     const handleResize = () => {
       if (!containerRef.current) return
@@ -318,7 +328,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       window.removeEventListener('resize', handleResize)
       simulation.stop()
     }
-  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels, hoveredNodeId, height])
+  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels, height])
 
   if (!graphData) {
     return (
@@ -331,26 +341,44 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     )
   }
 
+  const scale = Math.round(currentTransform.k * 100)
+
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800" style={{ height: `${height}px` }}>
         <svg ref={svgRef} className="w-full h-full" />
       </div>
 
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <button
+          onClick={handleResetView}
+          className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          title="重置视图"
+        >
+          <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+        
+        <div className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg text-xs text-gray-500 dark:text-gray-400 font-medium">
+          {scale}%
+        </div>
+      </div>
+
       {tooltip.node && (
         <div
-          className="absolute pointer-events-none z-50 px-5 py-4 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-2xl border border-gray-700 max-w-xs"
+          className="absolute pointer-events-none z-50 px-4 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-2xl border border-gray-700 max-w-xs"
           style={{
             left: Math.min(tooltip.x + 15, (containerRef.current?.clientWidth || 0) - 220),
-            top: tooltip.y - 70,
+            top: tooltip.y - 60,
             transform: tooltip.x > (containerRef.current?.clientWidth || 0) - 250 ? 'translateX(-100%)' : 'none'
           }}
         >
-          <div className="font-bold text-lg mb-2 flex items-center gap-2">
+          <div className="font-bold text-sm mb-1.5 flex items-center gap-2">
             {tooltip.node.label}
           </div>
-          <div className="text-sm text-gray-300 mb-2">
-            <span className={`inline-block px-2 py-1 rounded-full text-xs mr-2 ${
+          <div className="text-xs text-gray-300 mb-1">
+            <span className={`inline-block px-2 py-0.5 rounded-full text-xs mr-2 ${
               tooltip.node.type === 'skill' ? 'bg-blue-900/50 text-blue-400' :
               tooltip.node.type === 'ability' ? 'bg-purple-900/50 text-purple-400' :
               tooltip.node.type === 'project' ? 'bg-green-900/50 text-green-400' :
@@ -362,31 +390,31 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
                '经历'}
             </span>
           </div>
-          <div className="text-sm text-gray-400">
+          <div className="text-xs text-gray-400">
             关联: {tooltip.node.weight} 个
           </div>
-          <div className="mt-3 pt-2 border-t border-gray-700 text-xs text-green-400">
+          <div className="mt-2 pt-1.5 border-t border-gray-700 text-xs text-green-400">
             点击查看详情 →
           </div>
         </div>
       )}
 
-      <div className="absolute bottom-4 left-4 flex gap-3 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-          <span>技能</span>
+      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap justify-center gap-2 text-xs text-gray-500 dark:text-gray-400 sm:static sm:flex-nowrap sm:bg-transparent sm:border-0 sm:shadow-none sm:p-0">
+        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          <span className="text-xs">技能</span>
         </div>
-        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
-          <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
-          <span>能力</span>
+        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+          <span className="text-xs">能力</span>
         </div>
-        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-          <span>项目</span>
+        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+          <span className="text-xs">项目</span>
         </div>
-        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
-          <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
-          <span>经历</span>
+        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+          <span className="text-xs">经历</span>
         </div>
       </div>
     </div>
