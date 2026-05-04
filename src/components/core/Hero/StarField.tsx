@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function StarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [hasPlayed, setHasPlayed] = useState(false)
 
   useEffect(() => {
-    if (hasPlayed) return
-
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -15,18 +12,14 @@ export function StarField() {
 
     let animationId: number
     let particles: Array<{ x: number; y: number; speed: number; size: number; opacity: number; life: number; maxLife: number }> = []
-    let time = 0
 
     const resize = () => {
       const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
+      if (rect && rect.width > 0 && rect.height > 0) {
         canvas.width = rect.width
         canvas.height = rect.height
       }
     }
-
-    resize()
-    window.addEventListener('resize', resize)
 
     const createParticles = () => {
       particles = []
@@ -34,8 +27,8 @@ export function StarField() {
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * canvas.width,
-          y: -50 - Math.random() * canvas.height,
-          speed: 3 + Math.random() * 4,
+          y: Math.random() * canvas.height,
+          speed: 2 + Math.random() * 3,
           size: 1.5 + Math.random() * 2.5,
           opacity: 0.5 + Math.random() * 0.5,
           life: 0,
@@ -44,18 +37,15 @@ export function StarField() {
       }
     }
 
-    createParticles()
-
     const animate = () => {
-      time++
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       particles.forEach((particle) => {
         particle.life++
-        particle.y += particle.speed
+        particle.y -= particle.speed
         particle.opacity = Math.max(0, particle.opacity - 0.002)
 
-        if (particle.life < particle.maxLife) {
+        if (particle.life < particle.maxLife && particle.y > -10) {
           ctx.beginPath()
           ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
           ctx.fillStyle = `rgba(74, 222, 128, ${particle.opacity})`
@@ -74,29 +64,41 @@ export function StarField() {
         }
       })
 
-      const allDead = particles.every(p => p.life > p.maxLife)
+      const allDead = particles.every(p => p.life > p.maxLife || p.y < -10)
+      const visibleParticles = particles.filter(p => p.life < p.maxLife && p.y > -10)
 
-      if (!allDead) {
+      if (visibleParticles.length > 0) {
         animationId = requestAnimationFrame(animate)
-      } else {
-        setHasPlayed(true)
       }
     }
 
+    resize()
+    createParticles()
     animate()
 
+    window.addEventListener('resize', () => {
+      resize()
+      createParticles()
+      animate()
+    })
+
     return () => {
-      window.removeEventListener('resize', resize)
+      window.removeEventListener('resize', () => {
+        resize()
+        createParticles()
+        animate()
+      })
       if (animationId) {
         cancelAnimationFrame(animationId)
       }
     }
-  }, [hasPlayed])
+  }, [])
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
     />
   )
 }

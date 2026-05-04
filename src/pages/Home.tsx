@@ -101,6 +101,7 @@ function GraphPreview() {
       className={`relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-gray-100 dark:to-gray-950 transition-all duration-1000 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
+      style={{ minHeight: `${graphHeight + 200}px` }}
     >
       <StarField />
 

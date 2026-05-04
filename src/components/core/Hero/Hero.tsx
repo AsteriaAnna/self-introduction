@@ -1,57 +1,26 @@
-import { useEffect, useState } from 'react'
 import { SiteConfig } from '@/types'
 import config from '@/data/config.json'
 
 export function Hero() {
   const siteConfig = config as SiteConfig
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100)
-    return () => clearTimeout(timer)
-  }, [])
 
   return (
     <section
       id="hero"
       className="min-h-screen flex items-center justify-center px-4 pt-20 pb-12 bg-gradient-to-b from-gray-50 via-white to-green-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-green-900/5"
     >
-      <div
-        className={`max-w-4xl mx-auto text-center transition-all duration-1000 ease-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-        }`}
-      >
-        <h1
-          className={`text-5xl md:text-7xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '200ms' }}
-        >
+      <div className="max-w-4xl mx-auto text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">
           {siteConfig.name}
         </h1>
-        <p
-          className={`text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-4 font-medium transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '400ms' }}
-        >
+        <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 mb-4 font-medium">
           {siteConfig.title}
         </p>
-        <p
-          className={`text-lg text-gray-500 dark:text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '600ms' }}
-        >
+        <p className="text-lg text-gray-500 dark:text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed">
           {siteConfig.bio}
         </p>
 
-        <div
-          className={`flex flex-col sm:flex-row gap-4 justify-center items-center transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '800ms' }}
-        >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {siteConfig.github && (
             <a
               href={siteConfig.github}
@@ -72,12 +41,7 @@ export function Hero() {
           )}
         </div>
 
-        <div
-          className={`mt-8 flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-500 dark:text-gray-400 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ transitionDelay: '1000ms' }}
-        >
+        <div className="mt-8 flex flex-col sm:flex-row gap-6 justify-center items-center text-gray-500 dark:text-gray-400">
           {siteConfig.phone && (
             <div className="flex items-center gap-2 hover:text-green-600 dark:hover:text-green-500 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
