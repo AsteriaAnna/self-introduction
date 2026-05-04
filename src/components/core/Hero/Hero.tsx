@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SiteConfig } from '@/types'
 import config from '@/data/config.json'
+import { StarField } from './StarField'
 
 export function Hero() {
   const siteConfig = config as SiteConfig
@@ -14,10 +15,12 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-screen flex items-center justify-center px-4 py-20 bg-white dark:bg-gray-950"
+      className="min-h-screen flex items-center justify-center px-4 py-20 relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-green-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-green-900/10"
     >
+      <StarField />
+
       <div
-        className={`max-w-4xl mx-auto text-center transition-all duration-1000 ease-out ${
+        className={`max-w-4xl mx-auto text-center transition-all duration-1000 ease-out relative z-10 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
         }`}
       >
