@@ -4,7 +4,6 @@ import { Hero } from '@components/core/Hero'
 import { ProjectList } from '@components/core/ProjectList'
 import { ExperienceTimeline } from '@components/core/Experience'
 import { KeywordsCloud } from '@components/extensions/Keywords'
-import { JDMatcher } from '@components/extensions/JDMatcher'
 import { KnowledgeGraph } from '@components/extensions/KnowledgeGraph/KnowledgeGraph'
 
 function Section({ id, title, children, isLight = true }: {
@@ -103,6 +102,9 @@ function GraphPreview() {
     >
       <div className="max-w-6xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">知识图谱</h2>
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-6 sm:mb-8 max-w-lg mx-auto text-sm sm:text-base">
+          点击节点查看详情 · 下方标签筛选列表
+        </p>
         <KnowledgeGraph height={graphHeight} />
       </div>
     </section>
@@ -131,12 +133,6 @@ export default function Home() {
         <Hero />
 
         <GraphPreview />
-
-        <section id="jdmatcher" className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
-          <div className="max-w-4xl mx-auto">
-            <JDMatcher />
-          </div>
-        </section>
 
         <section id="keywords" className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950 transition-all duration-1000">
           <div className="max-w-6xl mx-auto">
