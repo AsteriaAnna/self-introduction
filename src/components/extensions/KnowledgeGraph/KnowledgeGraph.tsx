@@ -17,9 +17,6 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null)
   const navigate = useNavigate()
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
-  const linkRef = useRef<d3.Selection<SVGLineElement, GraphEdge, SVGGElement, unknown> | null>(null)
-  const nodeRef = useRef<d3.Selection<SVGGElement, GraphNode, SVGGElement, unknown> | null>(null)
-  const isDraggingRef = useRef(false)
 
   useEffect(() => {
     try {
@@ -36,8 +33,6 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
-    if (isDraggingRef.current) return
-    
     try {
       if (node.type === 'project' || node.type === 'experience') {
         if (!node.originalId) {
@@ -72,11 +67,15 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     svg.selectAll('*').remove()
     svg.attr('width', width).attr('height', containerHeight)
 
+    const isHighlighted = (nodeLabel: string) => highlightedLabels.includes(nodeLabel)
+
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(80).strength(0.5))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-150))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(100))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(-200))
       .force('center', d3.forceCenter(width / 2, containerHeight / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 20))
+      .force('collision', d3.forceCollide<GraphNode>().radius(40))
+      .force('x', d3.forceX(width / 2).strength(0.05))
+      .force('y', d3.forceY(containerHeight / 2).strength(0.05))
     
     simulationRef.current = simulation
 
@@ -84,11 +83,9 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .selectAll('line')
       .data(edges)
       .enter().append('line')
-      .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)')
+      .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(148, 163, 184, 0.28)')
       .attr('stroke-width', 1)
       .attr('stroke-linecap', 'round')
-
-    linkRef.current = link
 
     const node = svg.append('g')
       .selectAll('g')
@@ -96,8 +93,10 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .enter().append('g')
       .attr('class', 'node')
       .attr('cursor', 'pointer')
-
-    nodeRef.current = node
+      .call(d3.drag<SVGGElement, GraphNode>()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended))
 
     node.each(function(d: GraphNode) {
       const g = d3.select(this)
@@ -105,9 +104,9 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
       g.append('circle')
         .attr('r', r)
-        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.05)' : 'rgba(148, 163, 184, 0.08)')
-        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.2)')
-        .attr('stroke-width', 1)
+        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.06)' : 'rgba(148, 163, 184, 0.1)')
+        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.3)')
+        .attr('stroke-width', 1.2)
         .attr('class', 'node-circle')
 
       g.append('text')
@@ -127,16 +126,61 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
         })
     })
 
-    let lastTickTime = 0
-    const tickInterval = 1000 / 30
+    node.on('mouseover', function(event, d) {
+      const color = isDark ? '#38bdf8' : '#2563eb'
+
+      d3.select(this).select('.node-circle')
+        .transition()
+        .duration(120)
+        .attr('fill', isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.12)')
+        .attr('stroke', color)
+        .attr('stroke-width', 1.8)
+
+      d3.select(this).select('.node-label')
+        .transition()
+        .duration(120)
+        .attr('fill', color)
+        .attr('font-weight', 600)
+    })
+
+    node.on('mouseout', function(event, d) {
+      d3.select(this).select('.node-circle')
+        .transition()
+        .duration(120)
+        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.06)' : 'rgba(148, 163, 184, 0.1)')
+        .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.3)')
+        .attr('stroke-width', 1.2)
+
+      d3.select(this).select('.node-label')
+        .transition()
+        .duration(120)
+        .attr('fill', isDark ? '#94a3b8' : '#64748b')
+        .attr('font-weight', 500)
+    })
+
+    node.on('click', function(event, d) {
+      event.stopPropagation()
+      handleNodeClick(d)
+    })
+
+    function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      if (!event.active) simulation.alphaTarget(0.1).restart()
+      event.subject.fx = event.x
+      event.subject.fy = event.y
+    }
+
+    function dragged(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      event.subject.fx = event.x
+      event.subject.fy = event.y
+    }
+
+    function dragended(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      if (!event.active) simulation.alphaTarget(0)
+      event.subject.fx = null
+      event.subject.fy = null
+    }
 
     simulation.on('tick', () => {
-      if (isDraggingRef.current) return
-      
-      const now = Date.now()
-      if (now - lastTickTime < tickInterval) return
-      lastTickTime = now
-
       link
         .attr('x1', (d: any) => d.source.x)
         .attr('y1', (d: any) => d.source.y)
@@ -146,90 +190,6 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       node.attr('transform', (d) => `translate(${d.x},${d.y})`)
     })
 
-    node.on('mouseover', function(event, d) {
-      if (simulationRef.current) {
-        simulationRef.current.stop()
-      }
-
-      const color = isDark ? '#38bdf8' : '#2563eb'
-
-      d3.select(this).select('.node-circle')
-        .attr('fill', isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.15)')
-        .attr('stroke', color)
-        .attr('stroke-width', 2)
-
-      d3.select(this).select('.node-label')
-        .attr('fill', color)
-        .attr('font-weight', 600)
-    })
-
-    node.on('mouseout', function(event, d) {
-      if (!isDraggingRef.current) {
-        d3.select(this).select('.node-circle')
-          .attr('fill', isDark ? 'rgba(148, 163, 184, 0.05)' : 'rgba(148, 163, 184, 0.08)')
-          .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.2)')
-          .attr('stroke-width', 1)
-
-        d3.select(this).select('.node-label')
-          .attr('fill', isDark ? '#94a3b8' : '#64748b')
-          .attr('font-weight', 500)
-      }
-    })
-
-    node.on('click', function(event, d) {
-      event.stopPropagation()
-      handleNodeClick(d)
-    })
-
-    const drag = d3.drag<SVGGElement, GraphNode>()
-      .on('start', function(event, d) {
-        isDraggingRef.current = false
-        if (!event.active) simulation.alphaTarget(0.3).restart()
-        d.fx = d.x
-        d.fy = d.y
-      })
-      .on('drag', function(event, d) {
-        isDraggingRef.current = true
-        d.fx = event.x
-        d.fy = event.y
-        
-        d3.select(this).attr('transform', `translate(${d.fx},${d.fy})`)
-        
-        link.each(function(linkData: any) {
-          if (linkData.source.id === d.id) {
-            d3.select(this)
-              .attr('x1', d.fx)
-              .attr('y1', d.fy)
-          } else if (linkData.target.id === d.id) {
-            d3.select(this)
-              .attr('x2', d.fx)
-              .attr('y2', d.fy)
-          }
-        })
-      })
-      .on('end', function(event, d) {
-        if (!event.active) simulation.alphaTarget(0)
-        d.fx = null
-        d.fy = null
-        
-        setTimeout(() => {
-          isDraggingRef.current = false
-          
-          d3.select(this).select('.node-circle')
-            .attr('fill', isDark ? 'rgba(148, 163, 184, 0.05)' : 'rgba(148, 163, 184, 0.08)')
-            .attr('stroke', isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.2)')
-            .attr('stroke-width', 1)
-
-          d3.select(this).select('.node-label')
-            .attr('fill', isDark ? '#94a3b8' : '#64748b')
-            .attr('font-weight', 500)
-        }, 50)
-        
-        simulation.alpha(0.3).restart()
-      })
-
-    node.call(drag)
-
     const handleResize = () => {
       if (!containerRef.current) return
       const newWidth = containerRef.current.clientWidth
@@ -237,6 +197,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       if (newWidth > 0 && newHeight > 0) {
         svg.attr('width', newWidth).attr('height', newHeight)
         simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+        simulation.force('x', d3.forceX(newWidth / 2).strength(0.05))
+        simulation.force('y', d3.forceY(newHeight / 2).strength(0.05))
         simulation.alpha(0.1).restart()
       }
     }
