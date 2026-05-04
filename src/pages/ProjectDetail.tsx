@@ -36,10 +36,74 @@ export default function ProjectDetail() {
     )
   }
 
+  const MarkdownComponents = {
+    h1: ({ children }: { children: React.ReactNode }) => (
+      <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-gray-900 dark:text-white mt-12 mb-6">
+        {children}
+      </h1>
+    ),
+    h2: ({ children }: { children: React.ReactNode }) => (
+      <h2 className="text-xl sm:text-2xl font-light tracking-tight text-gray-900 dark:text-white mt-10 mb-4">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }: { children: React.ReactNode }) => (
+      <h3 className="text-lg sm:text-xl font-light text-gray-900 dark:text-white mt-8 mb-3">
+        {children}
+      </h3>
+    ),
+    p: ({ children }: { children: React.ReactNode }) => (
+      <p className={`text-sm sm:text-base leading-relaxed mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+        {children}
+      </p>
+    ),
+    ul: ({ children }: { children: React.ReactNode }) => (
+      <ul className={`space-y-3 mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+        {children}
+      </ul>
+    ),
+    ol: ({ children }: { children: React.ReactNode }) => (
+      <ol className={`space-y-3 mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+        {children}
+      </ol>
+    ),
+    li: ({ children }: { children: React.ReactNode }) => (
+      <li className="text-sm sm:text-base flex items-start gap-2">
+        <span className={`shrink-0 w-1.5 h-1.5 rounded-full mt-2 ${theme === 'dark' ? 'bg-gray-500' : 'bg-gray-400'}`}></span>
+        <span>{children}</span>
+      </li>
+    ),
+    blockquote: ({ children }: { children: React.ReactNode }) => (
+      <blockquote className={`border-l-2 pl-4 py-1 my-6 ${theme === 'dark' ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-500'}`}>
+        {children}
+      </blockquote>
+    ),
+    code: ({ children }: { children: React.ReactNode }) => (
+      <code className={`px-2 py-0.5 rounded text-xs font-mono ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+        {children}
+      </code>
+    ),
+    pre: ({ children }: { children: React.ReactNode }) => (
+      <pre className={`p-4 rounded-lg text-sm overflow-x-auto my-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+        {children}
+      </pre>
+    ),
+    a: ({ href, children }: { href: string; children: React.ReactNode }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`text-sm font-medium transition-colors hover:underline ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+      >
+        {children}
+      </a>
+    ),
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 pt-32 pb-20">
+      <main className="max-w-3xl lg:max-w-4xl mx-auto px-6 pt-32 pb-20">
         <Link
           to="/"
           className="inline-flex items-center gap-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mb-16 text-sm tracking-wide transition-colors"
@@ -52,7 +116,7 @@ export default function ProjectDetail() {
 
         <header className="mb-16">
           <div className="flex items-baseline justify-between mb-6">
-            <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-gray-900 dark:text-white">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-gray-900 dark:text-white">
               {project.title}
             </h1>
             <span className={`text-xs tracking-wide ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -79,7 +143,7 @@ export default function ProjectDetail() {
               {project.skillTags.map((tag) => (
                 <span
                   key={tag}
-                  className={`text-xs px-3 py-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                  className={`text-xs px-4 py-1.5 rounded-full border ${theme === 'dark' ? 'text-gray-400 border-gray-700' : 'text-gray-500 border-gray-200'}`}
                 >
                   {tag}
                 </span>
@@ -88,11 +152,11 @@ export default function ProjectDetail() {
           )}
 
           {project.abilityTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               {project.abilityTags.map((tag) => (
                 <span
                   key={tag}
-                  className={`text-xs px-3 py-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+                  className={`text-xs px-4 py-1.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
                 >
                   {tag}
                 </span>
@@ -101,8 +165,8 @@ export default function ProjectDetail() {
           )}
         </header>
 
-        <article className={`prose prose-lg dark:prose-invert max-w-none ${theme === 'dark' ? 'prose-gray-400' : 'prose-gray-600'}`}>
-          <ReactMarkdown>{project.content}</ReactMarkdown>
+        <article className="space-y-1">
+          <ReactMarkdown components={MarkdownComponents}>{project.content}</ReactMarkdown>
         </article>
       </main>
     </div>
