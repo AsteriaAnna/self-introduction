@@ -83,6 +83,38 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
     const isDark = theme === 'dark'
 
+    // 根据屏幕大小计算缩放比例
+    const screenWidth = window.innerWidth
+    let scale = 1
+    let fontSize = '11px'
+    let maxLabelLength = 18
+    let linkDistance = 120
+    let chargeStrength = -200
+    let collisionRadius = 60
+    
+    if (screenWidth < 640) {
+      scale = 0.7
+      fontSize = '9px'
+      maxLabelLength = 10
+      linkDistance = 80
+      chargeStrength = -120
+      collisionRadius = 40
+    } else if (screenWidth < 768) {
+      scale = 0.8
+      fontSize = '10px'
+      maxLabelLength = 14
+      linkDistance = 100
+      chargeStrength = -160
+      collisionRadius = 50
+    } else if (screenWidth < 1024) {
+      scale = 0.9
+      fontSize = '11px'
+      maxLabelLength = 16
+      linkDistance = 110
+      chargeStrength = -180
+      collisionRadius = 55
+    }
+
     svg.selectAll('*').remove()
     svg.attr('width', width).attr('height', containerHeight)
 
@@ -95,12 +127,12 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     const hoverTextColor = isDark ? '#cbd5e1' : '#334155'
 
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(120))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-200))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(linkDistance))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(chargeStrength))
       .force('center', d3.forceCenter(width / 2, containerHeight / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius(60))
-      .force('x', d3.forceX(width / 2).strength(0.02))
-      .force('y', d3.forceY(containerHeight / 2).strength(0.02))
+      .force('collision', d3.forceCollide<GraphNode>().radius(collisionRadius))
+      .force('x', d3.forceX(width / 2).strength(0.03))
+      .force('y', d3.forceY(containerHeight / 2).strength(0.03))
 
     simulationRef.current = simulation
 
@@ -119,6 +151,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .enter().append('g')
       .attr('class', 'node')
       .attr('cursor', 'pointer')
+      .style('touch-action', 'none') // 禁止触摸时的默认滚动行为
       .call(d3.drag<SVGGElement, GraphNode>()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -126,7 +159,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
     node.each(function(d: GraphNode) {
       const g = d3.select(this)
-      const r = getNodeSize(d.weight) * 0.4
+      const r = getNodeSize(d.weight) * 0.4 * scale
 
       g.append('circle')
         .attr('r', r)
@@ -137,18 +170,17 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
       g.append('text')
         .attr('class', 'node-label')
-        .attr('x', r + 8)
-        .attr('y', 4)
-        .attr('font-size', '11px')
+        .attr('x', r + 6)
+        .attr('y', 3)
+        .attr('font-size', fontSize)
         .attr('font-weight', 400)
         .attr('fill', textColor)
         .style('pointer-events', 'none')
         .style('user-select', 'none')
         .style('letter-spacing', '-0.01em')
-        .style('max-width', '150px')
         .text(() => {
           const label = d.label
-          if (label.length > 18) return label.substring(0, 18) + '...'
+          if (label.length > maxLabelLength) return label.substring(0, maxLabelLength) + '...'
           return label
         })
     })
@@ -276,7 +308,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
   return (
     <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full" style={{ height: `${containerHeight}px`, cursor: 'grab' }}>
+      <div ref={containerRef} className="w-full" style={{ height: `${containerHeight}px`, cursor: 'grab', touchAction: 'auto' }}>
         <svg ref={svgRef} className="w-full h-full" />
       </div>
     </div>

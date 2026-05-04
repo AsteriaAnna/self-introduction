@@ -74,16 +74,20 @@ function HeroSection() {
             {config.email && (
               <a
                 href={`mailto:${config.email}`}
-                className={`px-8 sm:px-10 py-3 text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} border-b-2 ${theme === 'dark' ? 'border-white/20 hover:border-white' : 'border-gray-900/20 hover:border-gray-900'}`}
+                className={`relative inline-block px-8 sm:px-10 py-2 text-xs sm:text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
               >
                 {t('hero.contact')}
+                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} hover:w-full`} />
+                <span className={`absolute -bottom-1 left-0 w-full h-0.5 ${theme === 'dark' ? 'bg-white/20' : 'bg-gray-900/20'}`} />
               </a>
             )}
             <a
               href="#graph"
-              className={`px-8 sm:px-10 py-3 text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+              className={`relative inline-block px-8 sm:px-10 py-2 text-xs sm:text-sm tracking-wide transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
             >
               {t('hero.explore')}
+              <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} hover:w-full`} />
+              <span className={`absolute -bottom-1 left-0 w-full h-0.5 ${theme === 'dark' ? 'bg-white/20' : 'bg-gray-900/20'}`} />
             </a>
           </div>
         </div>
@@ -484,7 +488,7 @@ function KnowledgeGraphSection() {
           }`}
         >
           <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
-            <KnowledgeGraph height={400} />
+            <KnowledgeGraph height={500} />
           </div>
         </div>
       </div>

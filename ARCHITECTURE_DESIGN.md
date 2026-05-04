@@ -323,8 +323,9 @@ interface KnowledgeGraphProps {
 interface GraphNode {
   id: string;
   label: string;
-  type: 'skill' | 'project' | 'experience';
+  type: 'skill' | 'ability' | 'project' | 'experience';
   weight: number;
+  originalId?: string;  // 原始项目/经历ID，用于跳转
 }
 
 interface GraphEdge {
@@ -346,32 +347,33 @@ interface JDMatchResult {
 ```typescript
 // ==================== 自定义Hooks ====================
 
+interface UseLoggerReturn {
+  log: {
+    debug: (message: string, details?: Record<string, unknown>) => void;
+    info: (message: string, details?: Record<string, unknown>) => void;
+    warn: (message: string, details?: Record<string, unknown>) => void;
+    error: (message: string, details?: Record<string, unknown>, error?: Error) => void;
+  };
+  startTimer: () => () => void;
+  createLogger: (moduleName: string) => ModuleLogger;
+  traceId: string;
+}
+
 interface UseThemeReturn {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   setTheme: (theme: 'light' | 'dark') => void;
 }
 
-interface UseMarkdownReturn {
-  data: Project[] | Experience[];
-  loading: boolean;
+interface UseErrorHandlerReturn {
+  handleError: (error: Error, context?: string) => void;
   error: Error | null;
-  refetch: () => void;
+  clearError: () => void;
 }
 
-interface UseJDMatchReturn {
-  match: (jdText: string) => JDMatchResult;
-  clear: () => void;
-  result: JDMatchResult | null;
-  isMatching: boolean;
-}
-
-interface UseFilterReturn {
-  selectedKeyword: string | null;
-  setSelectedKeyword: (keyword: string | null) => void;
-  filteredProjects: Project[];
-  filteredExperiences: Experience[];
-  clearFilter: () => void;
+interface UseScrollAnimationReturn {
+  ref: React.RefObject<HTMLElement>;
+  isVisible: boolean;
 }
 ```
 
@@ -383,71 +385,60 @@ interface UseFilterReturn {
 project-self-introduction-v1/
 ├── src/
 │   ├── components/                    # 组件目录
-│   │   ├── core/                      # 核心组件
+│   │   ├── core/                      # 核心业务组件
 │   │   │   ├── Hero/
 │   │   │   │   ├── Hero.tsx
-│   │   │   │   ├── Hero.styles.ts
+│   │   │   │   ├── StarField.tsx      # 星空背景动画
 │   │   │   │   └── index.ts
 │   │   │   ├── ProjectList/
 │   │   │   │   ├── ProjectList.tsx
 │   │   │   │   ├── ProjectCard.tsx
-│   │   │   │   ├── ProjectList.styles.ts
 │   │   │   │   └── index.ts
 │   │   │   └── Experience/
 │   │   │       ├── ExperienceTimeline.tsx
 │   │   │       ├── TimelineItem.tsx
-│   │   │       ├── Experience.styles.ts
 │   │   │       └── index.ts
 │   │   │
-│   │   ├── extensions/                # 扩展组件
+│   │   ├── extensions/                # 扩展功能组件
 │   │   │   ├── Keywords/
 │   │   │   │   ├── KeywordsCloud.tsx
 │   │   │   │   ├── KeywordTag.tsx
-│   │   │   │   ├── Keywords.styles.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── Theme/
 │   │   │   │   ├── ThemeToggle.tsx
 │   │   │   │   ├── ThemeProvider.tsx
-│   │   │   │   ├── Theme.styles.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── JDMatcher/
 │   │   │   │   ├── JDMatcher.tsx
-│   │   │   │   ├── JDInput.tsx
-│   │   │   │   ├── MatchResult.tsx
-│   │   │   │   ├── JDMatcher.styles.ts
 │   │   │   │   └── index.ts
 │   │   │   └── KnowledgeGraph/
-│   │   │       ├── KnowledgeGraph.tsx
-│   │   │       ├── GraphCanvas.tsx
-│   │   │       ├── NodeTooltip.tsx
-│   │   │       ├── KnowledgeGraph.styles.ts
+│   │   │       ├── KnowledgeGraph.tsx  # D3.js 知识图谱
 │   │   │       └── index.ts
 │   │   │
 │   │   └── common/                    # 通用组件
 │   │       ├── Layout/
-│   │       ├── Button/
-│   │       ├── Card/
-│   │       └── Modal/
+│   │       │   ├── Navbar.tsx
+│   │       │   └── index.ts
+│   │       ├── ErrorBoundary/
+│   │       │   ├── ErrorBoundary.tsx
+│   │       │   ├── ErrorProvider.tsx
+│   │       │   └── index.ts
+│   │       └── LogProvider.tsx
 │   │
 │   ├── hooks/                         # 自定义Hooks
-│   │   ├── useTheme.ts
-│   │   ├── useMarkdown.ts
-│   │   ├── useJDMatch.ts
-│   │   ├── useFilter.ts
-│   │   └── useGraph.ts
+│   │   ├── useLogger.ts              # 结构化日志
+│   │   ├── useErrorHandler.ts
+│   │   ├── useGlobalErrorHandler.ts
+│   │   └── useScrollAnimation.ts
 │   │
 │   ├── utils/                         # 工具函数
 │   │   ├── markdownParser.ts          # Markdown解析
 │   │   ├── keywordMatcher.ts          # 关键词匹配
 │   │   ├── graphBuilder.ts            # 图谱数据构建
-│   │   └── storage.ts                 # 本地存储
+│   │   └── logger.ts                  # 日志工具
 │   │
 │   ├── types/                         # 类型定义
-│   │   ├── project.ts
-│   │   ├── experience.ts
-│   │   ├── theme.ts
-│   │   ├── graph.ts
-│   │   └── index.ts
+│   │   └── index.ts                   # 统一导出所有类型
 │   │
 │   ├── data/                          # 数据文件
 │   │   ├── projects/                  # 项目Markdown
@@ -459,22 +450,24 @@ project-self-introduction-v1/
 │   │   └── config.json                # 站点配置
 │   │
 │   ├── styles/                        # 全局样式
-│   │   ├── themes.css                 # 主题变量
-│   │   ├── globals.css                # 全局样式
-│   │   └── variables.css              # CSS变量
+│   │   └── index.css                  # Tailwind + 全局样式
 │   │
 │   ├── pages/                         # 页面组件
 │   │   ├── Home.tsx                   # 首页
 │   │   ├── Graph.tsx                  # 知识图谱页
+│   │   ├── ProjectDetail.tsx         # 项目详情页
+│   │   ├── ExperienceDetail.tsx      # 经历详情页
+│   │   ├── SkillDetail.tsx           # 技能详情页
+│   │   ├── MatchResult.tsx           # JD匹配结果页
 │   │   └── NotFound.tsx               # 404页面
+│   │
+│   ├── docs/                          # 项目文档
+│   │   └── LOGGING_GUIDE.md          # 日志规范
 │   │
 │   ├── App.tsx                        # 应用入口
 │   └── main.tsx                       # 渲染入口
 │
 ├── public/                            # 静态资源
-│   ├── images/
-│   └── favicon.ico
-│
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
