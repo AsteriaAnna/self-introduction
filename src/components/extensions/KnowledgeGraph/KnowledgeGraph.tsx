@@ -21,7 +21,9 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, node: null })
   const [isDark, setIsDark] = useState(false)
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null)
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
   const navigate = useNavigate()
+  const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
 
   useEffect(() => {
     try {
@@ -45,6 +47,11 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
+    if (!node.originalId) {
+      console.warn('Node has no originalId:', node)
+      return
+    }
+    
     if (node.type === 'project') {
       navigate(`/project/${node.originalId}`)
     } else if (node.type === 'experience') {
@@ -78,7 +85,9 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     const zoom = d3.zoom()
       .scaleExtent([0.3, 3])
       .on('zoom', (event) => {
-        g.attr('transform', event.transform)
+        if (hoveredNodeId === null) {
+          g.attr('transform', event.transform)
+        }
       })
 
     svg.call(zoom)
@@ -102,6 +111,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius((d: GraphNode) => getNodeSize(d.weight) + 30))
+    
+    simulationRef.current = simulation
 
     const edge = g.append('g')
       .attr('class', 'edges')
@@ -113,7 +124,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .attr('opacity', (d: any) => {
         const sourceHighlighted = isHighlighted(d.source.label)
         const targetHighlighted = isHighlighted(d.target.label)
-        return sourceHighlighted && targetHighlighted ? 0.8 : 0.3
+        return sourceHighlighted && targetHighlighted ? 0.8 : 0.2
       })
       .attr('marker-end', 'url(#arrowhead)')
 
@@ -124,18 +135,27 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .enter().append('g')
       .attr('class', 'node')
       .attr('cursor', 'pointer')
-      .style('opacity', (d: GraphNode) => isHighlighted(d.label) ? 1 : 0.2)
 
     const nodeGroup = node.append('g').style('pointer-events', 'all')
 
     nodeGroup.append('circle')
       .attr('r', (d: GraphNode) => getNodeSize(d.weight))
-      .attr('fill', (d: GraphNode) => getNodeColor(d.type, isDark))
-      .attr('stroke', isDark ? '#ffffff33' : '#00000033')
-      .attr('stroke-width', (d: GraphNode) => isHighlighted(d.label) ? 4 : 2)
+      .attr('fill', (d: GraphNode) => {
+        if (isHighlighted(d.label)) {
+          return getNodeColor(d.type, isDark)
+        }
+        return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
+      })
+      .attr('stroke', (d: GraphNode) => {
+        if (isHighlighted(d.label)) {
+          return isDark ? '#ffffff40' : '#00000020'
+        }
+        return isDark ? '#ffffff15' : '#00000010'
+      })
+      .attr('stroke-width', (d: GraphNode) => isHighlighted(d.label) ? 3 : 1.5)
       .style('filter', (d: GraphNode) => {
         if (isHighlighted(d.label)) {
-          return isDark ? 'drop-shadow(0 0 20px rgba(74, 222, 128, 0.6))' : 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))'
+          return isDark ? 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))'
         }
         return 'none'
       })
@@ -144,9 +164,10 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       .attr('dy', (d: GraphNode) => getNodeSize(d.weight) + 16)
       .attr('text-anchor', 'middle')
       .attr('font-size', '12px')
-      .attr('fill', isDark ? '#e5e7eb' : '#374151')
+      .attr('fill', isDark ? '#9ca3af' : '#6b7280')
       .attr('font-weight', (d: GraphNode) => isHighlighted(d.label) ? 700 : 500)
       .style('pointer-events', 'none')
+      .style('opacity', (d: GraphNode) => isHighlighted(d.label) ? 1 : 0.6)
       .text((d: GraphNode) => {
         const label = d.label
         if (label.length > 10) return label.substring(0, 10) + '...'
@@ -154,52 +175,101 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       })
 
     node.on('mouseenter', (event, d: GraphNode) => {
-      const [x, y] = d3.pointer(event, containerRef.current)
+      setHoveredNodeId(d.id)
+      
+      if (simulationRef.current) {
+        simulationRef.current.stop()
+      }
+
+      const [x, y] = d3.pointer(event, container)
       setTooltip({ x, y, node: d })
 
-      d3.select(event.currentTarget).select('circle')
-        .transition().duration(200)
-        .attr('r', getNodeSize(d.weight) * 1.25)
-        .style('filter', isDark ? 'drop-shadow(0 0 25px rgba(74, 222, 128, 0.8))' : 'drop-shadow(0 0 20px rgba(74, 222, 128, 0.7))')
+      const nodeSelection = d3.select(event.currentTarget)
+      nodeSelection.select('circle')
+        .transition().duration(150)
+        .attr('r', getNodeSize(d.weight) * 1.2)
+        .attr('fill', getNodeColor(d.type, isDark))
+        .attr('stroke', isDark ? '#ffffff60' : '#00000030')
+        .attr('stroke-width', 3)
+        .style('filter', isDark ? 'drop-shadow(0 0 20px rgba(74, 222, 128, 0.7))' : 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.6))')
 
-      edge.attr('opacity', (e: any) => {
-        if (e.source.id === d.id || e.target.id === d.id) return 1
-        const sourceHighlighted = isHighlighted(e.source.label)
-        const targetHighlighted = isHighlighted(e.target.label)
-        return sourceHighlighted && targetHighlighted ? 0.6 : 0.2
-      })
+      nodeSelection.select('text')
+        .transition().duration(150)
+        .attr('font-weight', 700)
+        .style('opacity', 1)
+        .attr('fill', isDark ? '#e5e7eb' : '#1f2937')
 
-      node.style('opacity', (n: GraphNode) => {
-        if (n.id === d.id) return 1
-        const connected = edges.some(
-          (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
-        )
-        return connected ? 0.7 : isHighlighted(n.label) ? 0.8 : 0.15
-      })
+      edge.transition().duration(150)
+        .attr('opacity', (e: any) => {
+          if (e.source.id === d.id || e.target.id === d.id) return 0.9
+          const sourceHighlighted = isHighlighted(e.source.label)
+          const targetHighlighted = isHighlighted(e.target.label)
+          return sourceHighlighted && targetHighlighted ? 0.5 : 0.1
+        })
+
+      node.transition().duration(150)
+        .style('opacity', (n: GraphNode) => {
+          if (n.id === d.id) return 1
+          const connected = edges.some(
+            (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
+          )
+          if (connected) return 0.8
+          return isHighlighted(n.label) ? 0.7 : 0.15
+        })
     })
 
     node.on('mouseleave', (event, d: GraphNode) => {
+      setHoveredNodeId(null)
+      
+      if (simulationRef.current) {
+        simulationRef.current.alpha(0.3).restart()
+      }
+
       setTooltip({ x: 0, y: 0, node: null })
-      d3.select(event.currentTarget).select('circle')
-        .transition().duration(200)
+
+      const nodeSelection = d3.select(event.currentTarget)
+      nodeSelection.select('circle')
+        .transition().duration(150)
         .attr('r', getNodeSize(d.weight))
+        .attr('fill', (d: GraphNode) => {
+          if (isHighlighted(d.label)) {
+            return getNodeColor(d.type, isDark)
+          }
+          return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
+        })
+        .attr('stroke', (d: GraphNode) => {
+          if (isHighlighted(d.label)) {
+            return isDark ? '#ffffff40' : '#00000020'
+          }
+          return isDark ? '#ffffff15' : '#00000010'
+        })
+        .attr('stroke-width', (d: GraphNode) => isHighlighted(d.label) ? 3 : 1.5)
         .style('filter', (d: GraphNode) => {
           if (isHighlighted(d.label)) {
-            return isDark ? 'drop-shadow(0 0 20px rgba(74, 222, 128, 0.6))' : 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))'
+            return isDark ? 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.4))'
           }
           return 'none'
         })
 
-      edge.attr('opacity', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        return sourceHighlighted && targetHighlighted ? 0.8 : 0.3
-      })
+      nodeSelection.select('text')
+        .transition().duration(150)
+        .attr('font-weight', (d: GraphNode) => isHighlighted(d.label) ? 700 : 500)
+        .style('opacity', (d: GraphNode) => isHighlighted(d.label) ? 1 : 0.6)
+        .attr('fill', isDark ? '#9ca3af' : '#6b7280')
 
-      node.style('opacity', (n: GraphNode) => isHighlighted(n.label) ? 1 : 0.2)
+      edge.transition().duration(150)
+        .attr('opacity', (d: any) => {
+          const sourceHighlighted = isHighlighted(d.source.label)
+          const targetHighlighted = isHighlighted(d.target.label)
+          return sourceHighlighted && targetHighlighted ? 0.8 : 0.2
+        })
+
+      node.transition().duration(150)
+        .style('opacity', 1)
     })
 
     node.on('click', (event, d: GraphNode) => {
+      event.stopPropagation()
       handleNodeClick(d)
     })
 
@@ -244,7 +314,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       window.removeEventListener('resize', handleResize)
       simulation.stop()
     }
-  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels])
+  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels, hoveredNodeId])
 
   if (!graphData) {
     return (
