@@ -8,6 +8,7 @@ import Home from '@pages/Home'
 import Graph from '@pages/Graph'
 import NotFound from '@pages/NotFound'
 import ExperienceDetail from '@pages/ExperienceDetail'
+import ProjectDetail from '@pages/ProjectDetail'
 
 function GlobalErrorHandler() {
   useGlobalErrorHandler()
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/graph" element={<Graph />} />
                 <Route path="/experience/:id" element={<ExperienceDetail />} />
+                <Route path="/project/:id" element={<ProjectDetail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

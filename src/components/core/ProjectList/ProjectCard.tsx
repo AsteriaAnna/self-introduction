@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Project } from '@/types'
 
 interface ProjectCardProps {
@@ -7,8 +8,9 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps) {
   return (
-    <div
-      className={`p-6 rounded-lg border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+    <Link
+      to={`/project/${project.id}`}
+      className={`block p-6 rounded-lg border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
         isHighlighted
           ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
           : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-green-500 dark:hover:border-green-600'
@@ -52,17 +54,10 @@ export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps
 
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>{project.date}</span>
-        {project.link && (
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
-          >
-            查看项目 →
-          </a>
-        )}
+        <span className="text-green-600 dark:text-green-500 font-medium">
+          查看详情 →
+        </span>
       </div>
-    </div>
+    </Link>
   )
 }
