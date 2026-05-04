@@ -1,25 +1,21 @@
 ---
 id: project-005
-title: 个人博客系统
-date: 2025-09-25
-tags: [Next.js, Tailwind CSS, MDX, Vercel]
-link: https://github.com/AsteriaAnna/blog
+title: AI 图像识别系统
+date: 2024-10-05
+skillTags: [Python, TensorFlow, OpenCV]
+abilityTags: [科研能力, 持续探索, 逻辑思维]
+link: https://example.com
+image: /images/project-005.png
 status: completed
 ---
 
 ## 项目描述
 
-基于Markdown的静态博客系统，支持SEO优化、评论系统和访问统计。
+基于深度学习的图像识别系统，支持物体检测、分类和分割。
 
 ## 技术栈
 
-- Next.js 14
-- Tailwind CSS
-- MDX 博客内容
-- Vercel 部署
-
-## 主要成果
-
-- 百度SEO收录100%
-- 首屏加载<1.5s
-- GitHub Stars 500+
+- Python
+- TensorFlow
+- OpenCV
+- FastAPI

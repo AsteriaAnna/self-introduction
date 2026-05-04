@@ -49,16 +49,31 @@ export function ProjectCard({ project, isHighlighted = false, matchScore }: Proj
         {project.description}
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded text-sm"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {project.skillTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {project.skillTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-sm"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {project.abilityTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.abilityTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-sm"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>{project.date}</span>

@@ -2,7 +2,8 @@
 id: project-001
 title: 个人展示网页
 date: 2026-05-04
-tags: [React, TypeScript, Vite, Tailwind CSS, D3.js]
+skillTags: [React, TypeScript, Vite, Tailwind CSS, D3.js]
+abilityTags: [创新能力, 架构设计, 快速学习]
 link: https://example.com
 image: /images/project-001.png
 status: in-progress

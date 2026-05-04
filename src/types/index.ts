@@ -2,7 +2,8 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  tags: string[];
+  skillTags: string[];
+  abilityTags: string[];
   link?: string;
   image?: string;
   date: string;
@@ -16,7 +17,8 @@ export interface Experience {
   role: string;
   period: string;
   description: string;
-  tags: string[];
+  skillTags: string[];
+  abilityTags: string[];
   location?: string;
   content: string;
 }
@@ -24,13 +26,13 @@ export interface Experience {
 export interface Keyword {
   name: string;
   count: number;
-  type: 'skill' | 'tool' | 'domain';
+  type: 'skill' | 'ability' | 'tool' | 'domain';
 }
 
 export interface GraphNode {
   id: string;
   label: string;
-  type: 'skill' | 'project' | 'experience';
+  type: 'skill' | 'ability' | 'project' | 'experience';
   weight: number;
 }
 

@@ -69,10 +69,18 @@ export function matchProjects(jdKeywords: string[], projects: Project[]): {
   const matchScores = new Map<string, number>()
 
   projects.forEach(project => {
-    const projectTags = project.tags.map(tag => tag.toLowerCase())
-    const matchedCount = jdKeywords.filter(keyword =>
-      projectTags.some(tag => tag.includes(keyword.toLowerCase()))
+    const projectSkillTags = project.skillTags.map(tag => tag.toLowerCase())
+    const projectAbilityTags = project.abilityTags.map(tag => tag.toLowerCase())
+    
+    const matchedFromSkills = jdKeywords.filter(keyword =>
+      projectSkillTags.some(tag => tag.includes(keyword.toLowerCase()))
     ).length
+
+    const matchedFromAbilities = jdKeywords.filter(keyword =>
+      projectAbilityTags.some(tag => tag.includes(keyword.toLowerCase()))
+    ).length
+
+    const matchedCount = matchedFromSkills + matchedFromAbilities
 
     if (matchedCount > 0) {
       const score = (matchedCount / jdKeywords.length) * 100
@@ -96,18 +104,23 @@ export function matchExperiences(jdKeywords: string[], experiences: Experience[]
   const matchScores = new Map<string, number>()
 
   experiences.forEach(exp => {
-    const expTags = exp.tags.map(tag => tag.toLowerCase())
+    const expSkillTags = exp.skillTags.map(tag => tag.toLowerCase())
+    const expAbilityTags = exp.abilityTags.map(tag => tag.toLowerCase())
     const roleAndCompany = `${exp.role} ${exp.company}`.toLowerCase()
 
-    const matchedFromTags = jdKeywords.filter(keyword =>
-      expTags.some(tag => tag.includes(keyword.toLowerCase()))
+    const matchedFromSkills = jdKeywords.filter(keyword =>
+      expSkillTags.some(tag => tag.includes(keyword.toLowerCase()))
+    ).length
+
+    const matchedFromAbilities = jdKeywords.filter(keyword =>
+      expAbilityTags.some(tag => tag.includes(keyword.toLowerCase()))
     ).length
 
     const matchedFromRole = jdKeywords.filter(keyword =>
       roleAndCompany.includes(keyword.toLowerCase())
     ).length
 
-    const matchedCount = matchedFromTags + matchedFromRole
+    const matchedCount = matchedFromSkills + matchedFromAbilities + matchedFromRole
 
     if (matchedCount > 0) {
       const score = Math.min((matchedCount / jdKeywords.length) * 100, 100)

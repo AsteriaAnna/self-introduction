@@ -1,25 +1,22 @@
 ---
 id: project-003
-title: 智能日程管理系统
-date: 2026-01-20
-tags: [React, Python, FastAPI, SQLite]
-link: https://github.com/AsteriaAnna/smart-schedule
-status: in-progress
+title: 数据可视化平台
+date: 2025-08-20
+skillTags: [Python, Pandas, Matplotlib, Flask]
+abilityTags: [数据分析, 创新思维, 持续学习]
+link: https://example.com
+image: /images/project-003.png
+status: completed
 ---
 
 ## 项目描述
 
-基于AI的日程管理助手，支持智能提醒、日程冲突检测、自然语言输入。
+企业级数据可视化平台，支持多数据源接入，提供丰富的图表展示。
 
 ## 技术栈
 
-- React 18 + TypeScript
-- Python FastAPI
-- SQLite 数据库
-- OpenAI API
-
-## 主要成果
-
-- 日程冲突检测准确率95%
-- 自然语言解析支持10+种表达
-- 日均提醒次数5000+
+- Python 3.9
+- Pandas
+- Matplotlib
+- Flask
+- PostgreSQL

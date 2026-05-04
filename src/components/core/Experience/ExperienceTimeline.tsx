@@ -42,7 +42,8 @@ export function ExperienceTimeline({ filterKeywords = [], highlightedIds = [] }:
   const filteredExperiences = filterKeywords.length > 0
     ? experiences.filter(exp =>
         filterKeywords.some(keyword =>
-          exp.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+          exp.skillTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+          exp.abilityTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
           exp.role.toLowerCase().includes(keyword.toLowerCase()) ||
           exp.company.toLowerCase().includes(keyword.toLowerCase())
         )

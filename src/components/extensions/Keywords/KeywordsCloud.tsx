@@ -14,24 +14,50 @@ export function KeywordsCloud({ selectedKeywords, onKeywordClick }: KeywordsClou
     const projects = getAllProjects()
     const experiences = getAllExperiences()
 
-    const tagCounts = new Map<string, number>()
+    const tagCounts = new Map<string, { count: number; type: 'skill' | 'ability' }>()
 
     projects.forEach(project => {
-      project.tags.forEach(tag => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+      project.skillTags.forEach(tag => {
+        const existing = tagCounts.get(tag)
+        if (existing) {
+          existing.count += 1
+        } else {
+          tagCounts.set(tag, { count: 1, type: 'skill' })
+        }
+      })
+      project.abilityTags.forEach(tag => {
+        const existing = tagCounts.get(tag)
+        if (existing) {
+          existing.count += 1
+        } else {
+          tagCounts.set(tag, { count: 1, type: 'ability' })
+        }
       })
     })
 
     experiences.forEach(exp => {
-      exp.tags.forEach(tag => {
-        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+      exp.skillTags.forEach(tag => {
+        const existing = tagCounts.get(tag)
+        if (existing) {
+          existing.count += 1
+        } else {
+          tagCounts.set(tag, { count: 1, type: 'skill' })
+        }
+      })
+      exp.abilityTags.forEach(tag => {
+        const existing = tagCounts.get(tag)
+        if (existing) {
+          existing.count += 1
+        } else {
+          tagCounts.set(tag, { count: 1, type: 'ability' })
+        }
       })
     })
 
-    const keywordList: Keyword[] = Array.from(tagCounts.entries()).map(([name, count]) => ({
+    const keywordList: Keyword[] = Array.from(tagCounts.entries()).map(([name, data]) => ({
       name,
-      count,
-      type: 'skill' as const
+      count: data.count,
+      type: data.type
     }))
 
     keywordList.sort((a, b) => b.count - a.count)
@@ -58,6 +84,7 @@ export function KeywordsCloud({ selectedKeywords, onKeywordClick }: KeywordsClou
           const size = getSize(keyword.count, maxCount)
           const isSelected = selectedKeywords.includes(keyword.name)
           const delay = index * 30
+          const isAbility = keyword.type === 'ability'
 
           return (
             <button
@@ -67,8 +94,12 @@ export function KeywordsCloud({ selectedKeywords, onKeywordClick }: KeywordsClou
                 relative px-5 py-2.5 rounded-full transition-all duration-500 font-medium
                 transform hover:scale-110 hover:-translate-y-1
                 ${isSelected
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/30 scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500'
+                  ? isAbility
+                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/30 scale-105'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/30 scale-105'
+                  : isAbility
+                    ? 'bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500'
                 }
               `}
               style={{
@@ -79,7 +110,7 @@ export function KeywordsCloud({ selectedKeywords, onKeywordClick }: KeywordsClou
               {keyword.name}
               <span className={`
                 ml-2 text-xs font-normal
-                ${isSelected ? 'text-green-200' : 'text-gray-400 dark:text-gray-500'}
+                ${isSelected ? (isAbility ? 'text-purple-200' : 'text-green-200') : 'text-gray-400 dark:text-gray-500'}
               `}>
                 {keyword.count}
               </span>

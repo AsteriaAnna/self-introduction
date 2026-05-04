@@ -42,7 +42,8 @@ export function ProjectList({ filterKeywords = [], highlightedIds = [] }: Projec
   const filteredProjects = filterKeywords.length > 0
     ? projects.filter(p =>
         filterKeywords.some(keyword =>
-          p.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase()))
+          p.skillTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+          p.abilityTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase()))
         )
       )
     : projects

@@ -59,16 +59,31 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
           {experience.description}
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {experience.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded text-sm"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {experience.skillTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {experience.skillTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {experience.abilityTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {experience.abilityTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         <Link
           to={`/experience/${experience.id}`}

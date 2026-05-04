@@ -15,7 +15,7 @@ interface KnowledgeGraphProps {
   highlightedLabels?: string[]
 }
 
-export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管'] }: KnowledgeGraphProps) {
+export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管', '团队协作', '学习能力'] }: KnowledgeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, node: null })
@@ -49,7 +49,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       navigate(`/project/${node.originalId}`)
     } else if (node.type === 'experience') {
       navigate(`/experience/${node.originalId}`)
-    } else if (node.type === 'skill') {
+    } else if (node.type === 'skill' || node.type === 'ability') {
       navigate(`/skill/${encodeURIComponent(node.label)}`)
     }
   }, [navigate])
@@ -278,10 +278,12 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
           <div className="text-sm text-gray-300 mb-2">
             <span className={`inline-block px-2 py-1 rounded-full text-xs mr-2 ${
               tooltip.node.type === 'skill' ? 'bg-blue-900/50 text-blue-400' :
+              tooltip.node.type === 'ability' ? 'bg-purple-900/50 text-purple-400' :
               tooltip.node.type === 'project' ? 'bg-green-900/50 text-green-400' :
               'bg-orange-900/50 text-orange-400'
             }`}>
               {tooltip.node.type === 'skill' ? '技能' :
+               tooltip.node.type === 'ability' ? '能力' :
                tooltip.node.type === 'project' ? '项目' :
                '经历'}
             </span>
@@ -299,6 +301,10 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
         <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
           <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
           <span>技能</span>
+        </div>
+        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
+          <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+          <span>能力</span>
         </div>
         <div className="flex items-center gap-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>

@@ -46,7 +46,8 @@ export function parseProject(markdown: string): Project {
     id: String(data.id || ''),
     title: String(data.title || ''),
     description: String(data.description || ''),
-    tags: Array.isArray(data.tags) ? data.tags : [],
+    skillTags: Array.isArray(data.skillTags) ? data.skillTags : (Array.isArray(data.tags) ? data.tags : []),
+    abilityTags: Array.isArray(data.abilityTags) ? data.abilityTags : [],
     link: data.link ? String(data.link) : undefined,
     image: data.image ? String(data.image) : undefined,
     date: String(data.date || ''),
@@ -63,7 +64,8 @@ export function parseExperience(markdown: string): Experience {
     role: String(data.role || ''),
     period: String(data.period || ''),
     description: String(data.description || ''),
-    tags: Array.isArray(data.tags) ? data.tags : [],
+    skillTags: Array.isArray(data.skillTags) ? data.skillTags : (Array.isArray(data.tags) ? data.tags : []),
+    abilityTags: Array.isArray(data.abilityTags) ? data.abilityTags : [],
     location: data.location ? String(data.location) : undefined,
     content: content
   }

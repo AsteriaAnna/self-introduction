@@ -18,12 +18,13 @@ export function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
         id: projectId,
         label: project.title,
         type: 'project',
-        weight: project.tags.length,
+        weight: project.skillTags.length + project.abilityTags.length,
         originalId: project.id
       })
     }
 
-    project.tags.forEach(tag => {
+    // 处理技能标签
+    project.skillTags.forEach(tag => {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
 
       const tagId = `skill-${tag}`
@@ -33,6 +34,29 @@ export function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
           id: tagId,
           label: tag,
           type: 'skill',
+          weight: 1,
+          originalId: tag
+        })
+      }
+
+      edges.push({
+        source: projectId,
+        target: tagId,
+        weight: 1
+      })
+    })
+
+    // 处理能力标签
+    project.abilityTags.forEach(tag => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+
+      const tagId = `ability-${tag}`
+      if (!nodeIds.has(tagId)) {
+        nodeIds.add(tagId)
+        nodes.push({
+          id: tagId,
+          label: tag,
+          type: 'ability',
           weight: 1,
           originalId: tag
         })
@@ -54,12 +78,13 @@ export function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
         id: expId,
         label: `${exp.role}@${exp.company}`,
         type: 'experience',
-        weight: exp.tags.length,
+        weight: exp.skillTags.length + exp.abilityTags.length,
         originalId: exp.id
       })
     }
 
-    exp.tags.forEach(tag => {
+    // 处理技能标签
+    exp.skillTags.forEach(tag => {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
 
       const tagId = `skill-${tag}`
@@ -80,10 +105,33 @@ export function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
         weight: 1
       })
     })
+
+    // 处理能力标签
+    exp.abilityTags.forEach(tag => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+
+      const tagId = `ability-${tag}`
+      if (!nodeIds.has(tagId)) {
+        nodeIds.add(tagId)
+        nodes.push({
+          id: tagId,
+          label: tag,
+          type: 'ability',
+          weight: 1,
+          originalId: tag
+        })
+      }
+
+      edges.push({
+        source: expId,
+        target: tagId,
+        weight: 1
+      })
+    })
   })
 
   nodes.forEach(node => {
-    if (node.type === 'skill') {
+    if (node.type === 'skill' || node.type === 'ability') {
       node.weight = tagCounts.get(node.label) || 1
     }
   })
@@ -94,6 +142,7 @@ export function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
 export function getNodeColor(type: string, isDark: boolean): string {
   const colors: Record<string, { light: string; dark: string }> = {
     skill: { light: '#3b82f6', dark: '#60a5fa' },
+    ability: { light: '#8b5cf6', dark: '#a78bfa' },
     project: { light: '#22c55e', dark: '#4ade80' },
     experience: { light: '#f59e0b', dark: '#fbbf24' }
   }

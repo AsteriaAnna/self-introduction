@@ -67,11 +67,22 @@ function ProjectCard({ project }: { project: Project }) {
 
         <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{project.description}</p>
 
-        <div className="flex flex-wrap gap-2">
-          {project.tags.map((tag) => (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {project.skillTags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full"
+              className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {project.abilityTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full"
             >
               {tag}
             </span>
@@ -120,11 +131,22 @@ function TimelineItem({ experience }: { experience: Experience }) {
 
         <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{experience.description}</p>
 
-        <div className="flex flex-wrap gap-2">
-          {experience.tags.map((tag) => (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {experience.skillTags.map((tag) => (
             <span
               key={tag}
               className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {experience.abilityTags.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full"
             >
               {tag}
             </span>
@@ -160,12 +182,12 @@ export default function SkillDetail() {
     const projects = getAllProjects()
     const experiences = getAllExperiences()
 
-    const filteredProjects = projects.filter(project =>
-      project.tags.includes(label)
+    const filteredProjects = projects.filter(project => 
+      project.skillTags.includes(label) || project.abilityTags.includes(label)
     )
 
-    const filteredExperiences = experiences.filter(experience =>
-      experience.tags.includes(label)
+    const filteredExperiences = experiences.filter(experience => 
+      experience.skillTags.includes(label) || experience.abilityTags.includes(label)
     )
 
     setRelatedProjects(filteredProjects)
@@ -188,7 +210,7 @@ export default function SkillDetail() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-80">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 transition-colors font-medium">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
