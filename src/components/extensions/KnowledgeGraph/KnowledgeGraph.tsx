@@ -28,6 +28,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null)
   const gRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null)
+  const isHoveringRef = useRef<boolean>(false)
 
   useEffect(() => {
     try {
@@ -124,13 +125,17 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
     const isHighlighted = (nodeLabel: string) => highlightedLabels.includes(nodeLabel)
 
+    const centerX = width / 2
+    const centerY = containerHeight / 2
+
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(100).strength(0.4))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-300))
-      .force('center', d3.forceCenter(width / 2, containerHeight / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 20))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(80).strength(0.3))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(-200))
+      .force('center', d3.forceCenter(centerX, centerY).strength(0.1))
+      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 15))
     
     simulationRef.current = simulation
+    isHoveringRef.current = false
 
     const edge = g.append('g')
       .attr('class', 'edges')
@@ -188,10 +193,13 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       })
 
     node.on('mouseenter', function(event, d) {
+      isHoveringRef.current = true
       setHoveredNodeId(d.id)
       
       if (simulationRef.current) {
         simulationRef.current.stop()
+        d.fx = d.x
+        d.fy = d.y
       }
 
       const [x, y] = d3.pointer(event, container)
@@ -235,10 +243,14 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     })
 
     node.on('mouseleave', function(event, d) {
+      isHoveringRef.current = false
       setHoveredNodeId(null)
       
+      d.fx = null
+      d.fy = null
+      
       if (simulationRef.current) {
-        simulationRef.current.alpha(0.3).restart()
+        simulationRef.current.alpha(0.1).restart()
       }
 
       setTooltip({ x: 0, y: 0, node: null })
@@ -298,14 +310,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     })
 
     setTimeout(() => {
-      nodes.forEach(d => {
-        if (isHighlighted(d.label)) {
-          d.fx = width / 2 + (Math.random() - 0.5) * 120
-          d.fy = containerHeight / 2 + (Math.random() - 0.5) * 120
-        }
-      })
-      simulation.alpha(0.5).restart()
-    }, 500)
+      simulation.alpha(1).restart()
+    }, 100)
 
     const handleResize = () => {
       if (!containerRef.current) return
@@ -313,16 +319,12 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       const newHeight = containerRef.current.clientHeight
       if (newWidth > 0 && newHeight > 0) {
         svg.attr('width', newWidth).attr('height', newHeight)
-        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2).strength(0.1))
         simulation.alpha(0.3).restart()
       }
     }
 
     window.addEventListener('resize', handleResize)
-
-    setTimeout(() => {
-      simulation.alpha(1).restart()
-    }, 100)
 
     return () => {
       window.removeEventListener('resize', handleResize)
