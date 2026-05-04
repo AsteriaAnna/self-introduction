@@ -4,11 +4,10 @@ import { getAllExperiences } from '@/utils/markdownParser'
 import { TimelineItem } from './TimelineItem'
 
 interface ExperienceTimelineProps {
-  highlightedIds?: string[]
-  filterKeyword?: string | null
+  filterKeywords?: string[]
 }
 
-export function ExperienceTimeline({ highlightedIds = [], filterKeyword = null }: ExperienceTimelineProps) {
+export function ExperienceTimeline({ filterKeywords = [] }: ExperienceTimelineProps) {
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [isVisible, setIsVisible] = useState(false)
 
@@ -39,13 +38,25 @@ export function ExperienceTimeline({ highlightedIds = [], filterKeyword = null }
     }
   }, [])
 
-  const filteredExperiences = filterKeyword
+  const filteredExperiences = filterKeywords.length > 0
     ? experiences.filter(exp =>
-        exp.tags.some(tag => tag.toLowerCase().includes(filterKeyword.toLowerCase())) ||
-        exp.role.toLowerCase().includes(filterKeyword.toLowerCase()) ||
-        exp.company.toLowerCase().includes(filterKeyword.toLowerCase())
+        filterKeywords.some(keyword =>
+          exp.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+          exp.role.toLowerCase().includes(keyword.toLowerCase()) ||
+          exp.company.toLowerCase().includes(keyword.toLowerCase())
+        )
       )
     : experiences
+
+  if (filteredExperiences.length === 0 && filterKeywords.length > 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          没有找到匹配的经历
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative">
@@ -62,7 +73,6 @@ export function ExperienceTimeline({ highlightedIds = [], filterKeyword = null }
           <TimelineItem
             experience={experience}
             isLast={index === filteredExperiences.length - 1}
-            isHighlighted={highlightedIds.includes(experience.id)}
           />
         </div>
       ))}

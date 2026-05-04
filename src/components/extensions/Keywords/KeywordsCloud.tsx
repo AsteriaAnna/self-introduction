@@ -3,11 +3,11 @@ import { Keyword } from '@/types'
 import { getAllProjects, getAllExperiences } from '@/utils/markdownParser'
 
 interface KeywordsCloudProps {
-  selectedKeyword: string | null
+  selectedKeywords: string[]
   onKeywordClick: (keyword: string) => void
 }
 
-export function KeywordsCloud({ selectedKeyword, onKeywordClick }: KeywordsCloudProps) {
+export function KeywordsCloud({ selectedKeywords, onKeywordClick }: KeywordsCloudProps) {
   const [keywords, setKeywords] = useState<Keyword[]>([])
 
   useEffect(() => {
@@ -40,8 +40,8 @@ export function KeywordsCloud({ selectedKeyword, onKeywordClick }: KeywordsCloud
 
   const getSize = (count: number, maxCount: number) => {
     const minSize = 0.875
-    const maxSize = 1.5
-    const ratio = maxCount > 0 ? (count - 1) / (maxCount - 1) : 0
+    const maxSize = 2.25
+    const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 0
     return minSize + ratio * (maxSize - minSize)
   }
 
@@ -52,31 +52,41 @@ export function KeywordsCloud({ selectedKeyword, onKeywordClick }: KeywordsCloud
   }
 
   return (
-    <div className="flex flex-wrap gap-3 justify-center items-center py-8">
-      {keywords.map((keyword) => {
-        const size = getSize(keyword.count, maxCount)
-        const isSelected = selectedKeyword === keyword.name
+    <div className="relative w-full py-8">
+      <div className="flex flex-wrap justify-center items-center gap-4 px-4">
+        {keywords.map((keyword, index) => {
+          const size = getSize(keyword.count, maxCount)
+          const isSelected = selectedKeywords.includes(keyword.name)
+          const delay = index * 30
 
-        return (
-          <button
-            key={keyword.name}
-            onClick={() => onKeywordClick(keyword.name)}
-            className={`
-              px-4 py-2 rounded-full transition-all duration-300 font-medium
-              ${isSelected
-                ? 'bg-green-600 text-white shadow-lg scale-105'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-400'
-              }
-            `}
-            style={{ fontSize: `${size}rem` }}
-          >
-            {keyword.name}
-            <span className={`ml-2 text-xs ${isSelected ? 'text-green-200' : 'text-gray-400 dark:text-gray-500'}`}>
-              {keyword.count}
-            </span>
-          </button>
-        )
-      })}
+          return (
+            <button
+              key={keyword.name}
+              onClick={() => onKeywordClick(keyword.name)}
+              className={`
+                relative px-5 py-2.5 rounded-full transition-all duration-500 font-medium
+                transform hover:scale-110 hover:-translate-y-1
+                ${isSelected
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/30 scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500'
+                }
+              `}
+              style={{
+                fontSize: `${size}rem`,
+                transitionDelay: `${delay}ms`
+              }}
+            >
+              {keyword.name}
+              <span className={`
+                ml-2 text-xs font-normal
+                ${isSelected ? 'text-green-200' : 'text-gray-400 dark:text-gray-500'}
+              `}>
+                {keyword.count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

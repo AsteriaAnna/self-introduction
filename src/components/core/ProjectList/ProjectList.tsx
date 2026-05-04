@@ -4,11 +4,10 @@ import { getAllProjects } from '@/utils/markdownParser'
 import { ProjectCard } from './ProjectCard'
 
 interface ProjectListProps {
-  highlightedIds?: string[]
-  filterKeyword?: string | null
+  filterKeywords?: string[]
 }
 
-export function ProjectList({ highlightedIds = [], filterKeyword = null }: ProjectListProps) {
+export function ProjectList({ filterKeywords = [] }: ProjectListProps) {
   const [projects, setProjects] = useState<Project[]>([])
   const [isVisible, setIsVisible] = useState(false)
 
@@ -39,9 +38,23 @@ export function ProjectList({ highlightedIds = [], filterKeyword = null }: Proje
     }
   }, [])
 
-  const filteredProjects = filterKeyword
-    ? projects.filter(p => p.tags.some(tag => tag.toLowerCase().includes(filterKeyword.toLowerCase())))
+  const filteredProjects = filterKeywords.length > 0
+    ? projects.filter(p =>
+        filterKeywords.some(keyword =>
+          p.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase()))
+        )
+      )
     : projects
+
+  if (filteredProjects.length === 0 && filterKeywords.length > 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          没有找到匹配的项目
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -55,10 +68,7 @@ export function ProjectList({ highlightedIds = [], filterKeyword = null }: Proje
           }`}
           style={{ transitionDelay: `${index * 100}ms` }}
         >
-          <ProjectCard
-            project={project}
-            isHighlighted={highlightedIds.includes(project.id)}
-          />
+          <ProjectCard project={project} />
         </div>
       ))}
     </div>

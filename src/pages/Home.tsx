@@ -51,14 +51,18 @@ function Section({ id, title, children, isLight = true }: {
 }
 
 export default function Home() {
-  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null)
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
 
   const handleKeywordClick = (keyword: string) => {
-    if (selectedKeyword === keyword) {
-      setSelectedKeyword(null)
+    if (selectedKeywords.includes(keyword)) {
+      setSelectedKeywords(selectedKeywords.filter(k => k !== keyword))
     } else {
-      setSelectedKeyword(keyword)
+      setSelectedKeywords([...selectedKeywords, keyword])
     }
+  }
+
+  const clearAllFilters = () => {
+    setSelectedKeywords([])
   }
 
   return (
@@ -71,28 +75,32 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center">技能标签</h2>
             <KeywordsCloud
-              selectedKeyword={selectedKeyword}
+              selectedKeywords={selectedKeywords}
               onKeywordClick={handleKeywordClick}
             />
-            {selectedKeyword && (
-              <div className="text-center mt-4">
-                <button
-                  onClick={() => setSelectedKeyword(null)}
-                  className="text-sm text-green-600 dark:text-green-500 hover:underline"
-                >
-                  清除筛选
-                </button>
-              </div>
-            )}
           </div>
         </section>
 
+        {selectedKeywords.length > 0 && (
+          <div className="fixed bottom-8 right-8 z-40">
+            <button
+              onClick={clearAllFilters}
+              className="px-6 py-3 bg-green-600 text-white rounded-full shadow-xl hover:bg-green-700 transition-all duration-300 flex items-center gap-2 font-medium"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              清除筛选 ({selectedKeywords.length})
+            </button>
+          </div>
+        )}
+
         <Section id="projects" title="项目展示" isLight={false}>
-          <ProjectList filterKeyword={selectedKeyword} />
+          <ProjectList filterKeywords={selectedKeywords} />
         </Section>
 
         <Section id="experience" title="工作经历" isLight={true}>
-          <ExperienceTimeline filterKeyword={selectedKeyword} />
+          <ExperienceTimeline filterKeywords={selectedKeywords} />
         </Section>
 
         <Section id="contact" title="联系我" isLight={false}>
