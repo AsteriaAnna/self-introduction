@@ -5,9 +5,10 @@ import { TimelineItem } from './TimelineItem'
 
 interface ExperienceTimelineProps {
   filterKeywords?: string[]
+  highlightedIds?: string[]
 }
 
-export function ExperienceTimeline({ filterKeywords = [] }: ExperienceTimelineProps) {
+export function ExperienceTimeline({ filterKeywords = [], highlightedIds = [] }: ExperienceTimelineProps) {
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [isVisible, setIsVisible] = useState(false)
 
@@ -73,6 +74,7 @@ export function ExperienceTimeline({ filterKeywords = [] }: ExperienceTimelinePr
           <TimelineItem
             experience={experience}
             isLast={index === filteredExperiences.length - 1}
+            isHighlighted={highlightedIds.includes(experience.id)}
           />
         </div>
       ))}

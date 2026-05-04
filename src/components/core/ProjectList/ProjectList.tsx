@@ -5,9 +5,10 @@ import { ProjectCard } from './ProjectCard'
 
 interface ProjectListProps {
   filterKeywords?: string[]
+  highlightedIds?: string[]
 }
 
-export function ProjectList({ filterKeywords = [] }: ProjectListProps) {
+export function ProjectList({ filterKeywords = [], highlightedIds = [] }: ProjectListProps) {
   const [projects, setProjects] = useState<Project[]>([])
   const [isVisible, setIsVisible] = useState(false)
 
@@ -68,7 +69,10 @@ export function ProjectList({ filterKeywords = [] }: ProjectListProps) {
           }`}
           style={{ transitionDelay: `${index * 100}ms` }}
         >
-          <ProjectCard project={project} />
+          <ProjectCard
+            project={project}
+            isHighlighted={highlightedIds.includes(project.id)}
+          />
         </div>
       ))}
     </div>
