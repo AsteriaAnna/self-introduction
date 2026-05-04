@@ -7,6 +7,7 @@ import { ExperienceTimeline } from '@components/core/Experience'
 import { KeywordsCloud } from '@components/extensions/Keywords'
 import { JDMatcher } from '@components/extensions/JDMatcher'
 import { StarField } from '@components/core/Hero/StarField'
+import { KnowledgeGraph } from '@components/extensions/KnowledgeGraph/KnowledgeGraph'
 
 function Section({ id, title, children, isLight = true }: {
   id: string
@@ -53,15 +54,6 @@ function Section({ id, title, children, isLight = true }: {
   )
 }
 
-interface GraphPreviewNode {
-  id: string
-  label: string
-  type: 'skill' | 'project' | 'experience'
-  x: number
-  y: number
-  connections: string[]
-}
-
 function GraphPreview() {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -87,33 +79,6 @@ function GraphPreview() {
     }
   }, [])
 
-  const nodes: GraphPreviewNode[] = [
-    { id: 'react', label: 'React', type: 'skill', x: 50, y: 25, connections: ['project1', 'project2', 'exp1'] },
-    { id: 'typescript', label: 'TypeScript', type: 'skill', x: 25, y: 50, connections: ['project1', 'project3'] },
-    { id: 'nodejs', label: 'Node.js', type: 'skill', x: 75, y: 50, connections: ['project2', 'exp2'] },
-    { id: 'project1', label: '个人展示', type: 'project', x: 50, y: 75, connections: ['react', 'typescript'] },
-    { id: 'project2', label: '二手交易', type: 'project', x: 25, y: 75, connections: ['react', 'nodejs'] },
-    { id: 'exp1', label: '技术主管', type: 'experience', x: 75, y: 75, connections: ['react'] },
-  ]
-
-  const getNodeColor = (type: string) => {
-    switch (type) {
-      case 'skill': return 'bg-blue-500 hover:bg-blue-600'
-      case 'project': return 'bg-green-500 hover:bg-green-600'
-      case 'experience': return 'bg-orange-500 hover:bg-orange-600'
-      default: return 'bg-gray-500'
-    }
-  }
-
-  const getNodeBorderColor = (type: string) => {
-    switch (type) {
-      case 'skill': return 'border-blue-400'
-      case 'project': return 'border-green-400'
-      case 'experience': return 'border-orange-400'
-      default: return 'border-gray-400'
-    }
-  }
-
   return (
     <section
       id="graph-preview"
@@ -124,72 +89,16 @@ function GraphPreview() {
       <StarField />
       
       <div className="relative z-10 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-white">知识图谱预览</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">知识图谱</h2>
         
-        <div className="relative h-[400px] bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <svg className="absolute inset-0 w-full h-full">
-            <defs>
-              <marker
-                id="arrowhead"
-                markerWidth="10"
-                markerHeight="7"
-                refX="9"
-                refY="3.5"
-                orient="auto"
-              >
-                <polygon points="0 0, 10 3.5, 0 7" fill="rgba(74, 222, 128, 0.5)" />
-              </marker>
-            </defs>
-            
-            {nodes.flatMap(node =>
-              node.connections.map(targetId => {
-                const target = nodes.find(n => n.id === targetId)
-                if (!target) return null
-                return (
-                  <line
-                    key={`${node.id}-${targetId}`}
-                    x1={`${node.x}%`}
-                    y1={`${node.y}%`}
-                    x2={`${target.x}%`}
-                    y2={`${target.y}%`}
-                    stroke="rgba(74, 222, 128, 0.3)"
-                    strokeWidth="2"
-                    markerEnd="url(#arrowhead)"
-                    className="transition-all duration-500"
-                  />
-                )
-              })
-            )}
-          </svg>
-
-          {nodes.map((node, index) => (
-            <div
-              key={node.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-500 hover:scale-110 hover:shadow-lg ${
-                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-              }`}
-              style={{
-                left: `${node.x}%`,
-                top: `${node.y}%`,
-                transitionDelay: `${index * 100}ms`
-              }}
-            >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-medium text-xs ${getNodeColor(node.type)} border-2 ${getNodeBorderColor(node.type)} shadow-lg`}>
-                {node.label.charAt(0)}
-              </div>
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap">
-                <span className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 px-2 py-1 rounded">
-                  {node.label}
-                </span>
-              </div>
-            </div>
-          ))}
+        <div className="relative">
+          <KnowledgeGraph isPreview={true} highlightedLabels={['React', 'TypeScript', 'Node.js', '个人展示', '二手交易', '技术主管']} />
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <Link
             to="/graph"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-green-600 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-green-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-green-600 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-green-700 transition-all duration-300 font-medium shadow-xl hover:shadow-2xl"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -237,6 +146,8 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
+        
+        <GraphPreview />
 
         <section id="jdmatcher" className="py-12 px-4 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
           <div className="max-w-4xl mx-auto">
@@ -281,8 +192,6 @@ export default function Home() {
             联系方式已在首页展示
           </p>
         </Section>
-
-        <GraphPreview />
       </main>
     </div>
   )

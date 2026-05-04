@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 import { GraphNode, GraphEdge } from '@/types'
 import { buildGraphData, getNodeColor, getNodeSize } from '@/utils/graphBuilder'
@@ -9,7 +10,12 @@ interface TooltipData {
   node: GraphNode | null
 }
 
-export function KnowledgeGraph() {
+interface KnowledgeGraphProps {
+  isPreview?: boolean
+  highlightedLabels?: string[]
+}
+
+export function KnowledgeGraph({ isPreview = false, highlightedLabels = [] }: KnowledgeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, node: null })
@@ -40,12 +46,13 @@ export function KnowledgeGraph() {
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
+    if (isPreview) return
     if (node.type === 'project') {
       window.location.href = `/project/${node.originalId}`
     } else if (node.type === 'experience') {
       window.location.href = `/experience/${node.originalId}`
     }
-  }, [])
+  }, [isPreview])
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !graphData) return
@@ -75,7 +82,9 @@ export function KnowledgeGraph() {
         g.attr('transform', event.transform)
       })
 
-    svg.call(zoom)
+    if (!isPreview) {
+      svg.call(zoom)
+    }
 
     svg.append('defs').append('marker')
       .attr('id', 'arrowhead')
@@ -102,7 +111,12 @@ export function KnowledgeGraph() {
       .enter().append('line')
       .attr('stroke', isDark ? '#4b5563' : '#d1d5db')
       .attr('stroke-width', (d: GraphEdge) => Math.max(1, d.weight))
-      .attr('opacity', 0.7)
+      .attr('opacity', (d: any) => {
+        if (!isPreview || highlightedLabels.length === 0) return 0.7
+        const sourceHighlighted = highlightedLabels.includes(d.source.label)
+        const targetHighlighted = highlightedLabels.includes(d.target.label)
+        return sourceHighlighted && targetHighlighted ? 1 : 0
+      })
 
     const node = g.append('g')
       .attr('class', 'nodes')
@@ -110,7 +124,13 @@ export function KnowledgeGraph() {
       .data(nodes)
       .enter().append('g')
       .attr('class', 'node')
-      .call(d3.drag()
+      .style('opacity', (d: GraphNode) => {
+        if (!isPreview || highlightedLabels.length === 0) return 1
+        return highlightedLabels.includes(d.label) ? 1 : 0.1
+      })
+
+    if (!isPreview) {
+      node.call(d3.drag()
         .on('start', (event, d: any) => {
           if (!event.active) simulation.alphaTarget(0.3).restart()
           d.fx = d.x
@@ -126,14 +146,21 @@ export function KnowledgeGraph() {
           d.fy = null
         })
       )
+    }
 
     node.append('circle')
       .attr('r', (d: GraphNode) => getNodeSize(d.weight))
       .attr('fill', (d: GraphNode) => getNodeColor(d.type, isDark))
       .attr('stroke', isDark ? '#ffffff33' : '#00000033')
-      .attr('stroke-width', 2)
-      .attr('cursor', 'pointer')
-      .style('filter', 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))')
+      .attr('stroke-width', (d: GraphNode) => {
+        if (!isPreview || highlightedLabels.length === 0) return 2
+        return highlightedLabels.includes(d.label) ? 4 : 2
+      })
+      .attr('cursor', isPreview ? 'default' : 'pointer')
+      .style('filter', (d: GraphNode) => {
+        if (!isPreview || highlightedLabels.length === 0) return 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+        return highlightedLabels.includes(d.label) ? 'drop-shadow(0 0 10px rgba(74, 222, 128))' : 'none'
+      })
 
     node.append('text')
       .attr('dy', (d: GraphNode) => getNodeSize(d.weight) + 14)
@@ -148,42 +175,44 @@ export function KnowledgeGraph() {
         return label
       })
 
-    node.on('mouseenter', (event, d: GraphNode) => {
-      const [x, y] = d3.pointer(event, containerRef.current)
-      setTooltip({ x, y, node: d })
+    if (!isPreview) {
+      node.on('mouseenter', (event, d: GraphNode) => {
+        const [x, y] = d3.pointer(event, containerRef.current)
+        setTooltip({ x, y, node: d })
 
-      d3.select(event.currentTarget).select('circle')
-        .transition().duration(200)
-        .attr('r', getNodeSize(d.weight) * 1.3)
-        .attr('stroke-width', 3)
+        d3.select(event.currentTarget).select('circle')
+          .transition().duration(200)
+          .attr('r', getNodeSize(d.weight) * 1.3)
+          .attr('stroke-width', 3)
 
-      edge.attr('opacity', (e: any) => {
-        return e.source.id === d.id || e.target.id === d.id ? 1 : 0.15
+        edge.attr('opacity', (e: any) => {
+          return e.source.id === d.id || e.target.id === d.id ? 1 : 0.15
+        })
+
+        node.style('opacity', (n: GraphNode) => {
+          if (n.id === d.id) return 1
+          const connected = edges.some(
+            (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
+          )
+          return connected ? 0.9 : 0.25
+        })
       })
 
-      node.style('opacity', (n: GraphNode) => {
-        if (n.id === d.id) return 1
-        const connected = edges.some(
-          (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
-        )
-        return connected ? 0.9 : 0.25
+      node.on('mouseleave', (event, d: GraphNode) => {
+        setTooltip({ x: 0, y: 0, node: null })
+        d3.select(event.currentTarget).select('circle')
+          .transition().duration(200)
+          .attr('r', getNodeSize(d.weight))
+          .attr('stroke-width', 2)
+
+        edge.attr('opacity', 0.7)
+        node.style('opacity', 1)
       })
-    })
 
-    node.on('mouseleave', (event, d: GraphNode) => {
-      setTooltip({ x: 0, y: 0, node: null })
-      d3.select(event.currentTarget).select('circle')
-        .transition().duration(200)
-        .attr('r', getNodeSize(d.weight))
-        .attr('stroke-width', 2)
-
-      edge.attr('opacity', 0.7)
-      node.style('opacity', 1)
-    })
-
-    node.on('click', (event, d: GraphNode) => {
-      handleNodeClick(d)
-    })
+      node.on('click', (event, d: GraphNode) => {
+        handleNodeClick(d)
+      })
+    }
 
     simulation.on('tick', () => {
       edge
@@ -194,6 +223,18 @@ export function KnowledgeGraph() {
 
       node.attr('transform', (d: GraphNode) => `translate(${d.x}, ${d.y})`)
     })
+
+    if (isPreview && highlightedLabels.length > 0) {
+      setTimeout(() => {
+        nodes.forEach(d => {
+          if (highlightedLabels.includes(d.label)) {
+            d.fx = width / 2 + (Math.random() - 0.5) * 100
+            d.fy = height / 2 + (Math.random() - 0.5) * 100
+          }
+        })
+        simulation.alpha(0.3).restart()
+      }, 500)
+    }
 
     const handleResize = () => {
       if (!containerRef.current) return
@@ -216,7 +257,7 @@ export function KnowledgeGraph() {
       window.removeEventListener('resize', handleResize)
       simulation.stop()
     }
-  }, [graphData, isDark, handleNodeClick])
+  }, [graphData, isDark, handleNodeClick, isPreview, highlightedLabels])
 
   if (error) {
     return (
