@@ -5,9 +5,10 @@ interface TimelineItemProps {
   experience: Experience
   isLast?: boolean
   isHighlighted?: boolean
+  matchScore?: number
 }
 
-export function TimelineItem({ experience, isLast = false, isHighlighted = false }: TimelineItemProps) {
+export function TimelineItem({ experience, isLast = false, isHighlighted = false, matchScore }: TimelineItemProps) {
   return (
     <div className="relative pl-8 pb-8">
       {!isLast && (
@@ -38,6 +39,11 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
             </p>
           </div>
           <div className="text-right">
+            {matchScore !== undefined && (
+              <span className="inline-block px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded-full text-sm font-semibold mb-2">
+                {Math.round(matchScore)}% 匹配
+              </span>
+            )}
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {experience.period}
             </span>

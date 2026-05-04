@@ -4,9 +4,10 @@ import { Project } from '@/types'
 interface ProjectCardProps {
   project: Project
   isHighlighted?: boolean
+  matchScore?: number
 }
 
-export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps) {
+export function ProjectCard({ project, isHighlighted = false, matchScore }: ProjectCardProps) {
   return (
     <Link
       to={`/project/${project.id}`}
@@ -20,21 +21,28 @@ export function ProjectCard({ project, isHighlighted = false }: ProjectCardProps
         <h3 className="text-xl font-bold text-gray-900 dark:text-white">
           {project.title}
         </h3>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${
-            project.status === 'completed'
-              ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+        <div className="flex items-center gap-2">
+          {matchScore !== undefined && (
+            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded-full text-sm font-semibold">
+              {Math.round(matchScore)}% 匹配
+            </span>
+          )}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              project.status === 'completed'
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                : project.status === 'in-progress'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+            }`}
+          >
+            {project.status === 'completed'
+              ? '已完成'
               : project.status === 'in-progress'
-              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-              : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-          }`}
-        >
-          {project.status === 'completed'
-            ? '已完成'
-            : project.status === 'in-progress'
-            ? '进行中'
-            : '计划中'}
-        </span>
+              ? '进行中'
+              : '计划中'}
+          </span>
+        </div>
       </div>
 
       <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">

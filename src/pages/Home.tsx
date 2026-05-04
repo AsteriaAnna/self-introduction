@@ -53,9 +53,6 @@ function Section({ id, title, children, isLight = true }: {
 
 export default function Home() {
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
-  const [jdMatchedProjectIds, setJdMatchedProjectIds] = useState<string[]>([])
-  const [jdMatchedExperienceIds, setJdMatchedExperienceIds] = useState<string[]>([])
-  const [isJDMode, setIsJDMode] = useState(false)
 
   const handleKeywordClick = (keyword: string) => {
     if (selectedKeywords.includes(keyword)) {
@@ -65,27 +62,9 @@ export default function Home() {
     }
   }
 
-  const handleJDMatch = (projectIds: string[], experienceIds: string[]) => {
-    setJdMatchedProjectIds(projectIds)
-    setJdMatchedExperienceIds(experienceIds)
-    setIsJDMode(true)
-    setSelectedKeywords([])
-  }
-
-  const handleJDClear = () => {
-    setJdMatchedProjectIds([])
-    setJdMatchedExperienceIds([])
-    setIsJDMode(false)
-  }
-
   const clearAllFilters = () => {
     setSelectedKeywords([])
-    setJdMatchedProjectIds([])
-    setJdMatchedExperienceIds([])
-    setIsJDMode(false)
   }
-
-  const hasActiveFilters = selectedKeywords.length > 0 || jdMatchedProjectIds.length > 0
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
@@ -95,10 +74,7 @@ export default function Home() {
 
         <section id="jdmatcher" className="py-12 px-4 bg-gray-50 dark:bg-gray-900 transition-all duration-1000">
           <div className="max-w-4xl mx-auto">
-            <JDMatcher
-              onMatch={handleJDMatch}
-              onClear={handleJDClear}
-            />
+            <JDMatcher />
           </div>
         </section>
 
@@ -112,7 +88,7 @@ export default function Home() {
           </div>
         </section>
 
-        {hasActiveFilters && (
+        {selectedKeywords.length > 0 && (
           <div className="fixed bottom-8 right-8 z-40">
             <button
               onClick={clearAllFilters}
@@ -121,23 +97,17 @@ export default function Home() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              {isJDMode ? '清除JD匹配' : '清除筛选'} ({selectedKeywords.length || jdMatchedProjectIds.length})
+              清除筛选 ({selectedKeywords.length})
             </button>
           </div>
         )}
 
         <Section id="projects" title="项目展示" isLight={false}>
-          <ProjectList
-            filterKeywords={selectedKeywords}
-            highlightedIds={jdMatchedProjectIds}
-          />
+          <ProjectList filterKeywords={selectedKeywords} />
         </Section>
 
         <Section id="experience" title="工作经历" isLight={true}>
-          <ExperienceTimeline
-            filterKeywords={selectedKeywords}
-            highlightedIds={jdMatchedExperienceIds}
-          />
+          <ExperienceTimeline filterKeywords={selectedKeywords} />
         </Section>
 
         <Section id="contact" title="联系我" isLight={false}>
