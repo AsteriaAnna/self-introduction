@@ -20,9 +20,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, node: null })
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(true)
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null)
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
   const navigate = useNavigate()
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null)
 
@@ -45,6 +44,17 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     }
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        setIsDark(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
   }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
@@ -82,236 +92,118 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
     svg.selectAll('*').remove()
     svg.attr('width', width).attr('height', containerHeight)
 
-    const g = svg.append('g').attr('class', 'graph-group')
-
     const isHighlighted = (nodeLabel: string) => highlightedLabels.includes(nodeLabel)
 
+    const nodeLinks: Record<string, number> = {}
+    edges.forEach(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : String(l.source)
+      const targetId = typeof l.target === 'object' ? l.target.id : String(l.target)
+      nodeLinks[sourceId] = (nodeLinks[sourceId] || 0) + 1
+      nodeLinks[targetId] = (nodeLinks[targetId] || 0) + 1
+    })
+
+    const colorGroup = d3.scaleOrdinal<string>()
+      .domain(['skill', 'ability', 'project', 'experience'])
+      .range(['#38a169', '#a0aec0', '#718096', '#48bb78'])
+
     const simulation = d3.forceSimulation<GraphNode, GraphEdge>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(80).strength(0.4))
-      .force('charge', d3.forceManyBody<GraphNode>().strength(-150))
-      .force('center', d3.forceCenter(width / 2, containerHeight / 2).strength(0.05))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => getNodeSize(d.weight) + 12))
+      .force('link', d3.forceLink<GraphNode, GraphEdge>(edges).id((d) => d.id).distance(130))
+      .force('charge', d3.forceManyBody<GraphNode>().strength(-480))
+      .force('center', d3.forceCenter(width / 2, containerHeight / 2))
+      .force('collide', d3.forceCollide<GraphNode>().radius(65))
     
     simulationRef.current = simulation
 
-    const edge = g.append('g')
-      .attr('class', 'edges')
+    const link = svg.append('g')
       .selectAll('line')
       .data(edges)
       .enter().append('line')
-      .attr('stroke', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        if (sourceHighlighted && targetHighlighted) {
-          return isDark ? '#4ade80' : '#22c55e'
-        }
-        return isDark ? '#4b5563' : '#d1d5db'
-      })
-      .attr('stroke-width', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        if (sourceHighlighted && targetHighlighted) {
-          return 2.5
-        }
-        return Math.max(1, d.weight)
-      })
-      .attr('opacity', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        if (sourceHighlighted && targetHighlighted) {
-          return 0.9
-        }
-        return 0.5
-      })
-      .style('stroke-dasharray', (d: any) => {
-        const sourceHighlighted = isHighlighted(d.source.label)
-        const targetHighlighted = isHighlighted(d.target.label)
-        if (sourceHighlighted && targetHighlighted) {
-          return '5,5'
-        }
-        return 'none'
-      })
+      .attr('stroke', isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
+      .attr('stroke-width', 1)
 
-    const node = g.append('g')
-      .attr('class', 'nodes')
+    const node = svg.append('g')
       .selectAll('g')
       .data(nodes)
       .enter().append('g')
-      .attr('class', 'node')
-      .attr('cursor', 'pointer')
+      .call(d3.drag<SVGGElement, GraphNode>()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended))
 
-    const nodeGroup = node.append('g').style('pointer-events', 'all')
+    node.each(function(d: GraphNode) {
+      const g = d3.select(this)
+      const r = getNodeSize(d.weight)
+      const color = isHighlighted(d.label) ? getNodeColor(d.type, isDark) : colorGroup(d.type)
 
-    nodeGroup.append('circle')
-      .attr('r', (d) => getNodeSize(d.weight))
-      .attr('fill', (d) => {
-        if (isHighlighted(d.label)) {
-          return getNodeColor(d.type, isDark)
-        }
-        return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
-      })
-      .attr('stroke', (d) => {
-        if (isHighlighted(d.label)) {
-          return isDark ? '#ffffff40' : '#00000020'
-        }
-        return isDark ? '#ffffff10' : '#00000010'
-      })
-      .attr('stroke-width', (d) => isHighlighted(d.label) ? 2 : 1)
-      .style('filter', (d) => {
-        if (isHighlighted(d.label)) {
-          return isDark ? 'drop-shadow(0 0 10px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.4))'
-        }
-        return 'none'
-      })
+      g.append('circle')
+        .attr('r', r)
+        .attr('fill', color)
+        .attr('class', 'glass-node')
+        .style('opacity', 0.85)
+        .style('filter', 'blur(0.6px)')
 
-    nodeGroup.append('text')
-      .attr('dy', (d) => getNodeSize(d.weight) + 14)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '11px')
-      .attr('fill', isDark ? '#9ca3af' : '#6b7280')
-      .attr('font-weight', (d) => isHighlighted(d.label) ? 600 : 400)
+      g.append('circle')
+        .attr('r', r * 0.85)
+        .attr('fill', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)')
+        .attr('cy', -r * 0.25)
+        .attr('cx', -r * 0.25)
+
+      g.on('mouseover', function() {
+        d3.select(this).select('.glass-node')
+          .style('filter', `drop-shadow(0 0 12px ${color}80) blur(0.6px)`)
+      })
+      .on('mouseout', function() {
+        d3.select(this).select('.glass-node')
+          .style('filter', 'blur(0.6px)')
+      })
+    })
+
+    node.append('text')
+      .attr('class', 'node-text')
+      .attr('dx', 10)
+      .attr('dy', 4)
+      .attr('font-size', '12px')
+      .attr('font-weight', 500)
+      .attr('fill', isDark ? '#e2e8f0' : '#2d3748')
       .style('pointer-events', 'none')
-      .style('opacity', (d) => isHighlighted(d.label) ? 1 : 0.5)
+      .style('user-select', 'none')
       .text((d) => {
         const label = d.label
         if (label.length > 12) return label.substring(0, 12) + '...'
         return label
       })
 
-    node.on('mouseenter', function(event, d) {
-      setHoveredNodeId(d.id)
-      
-      if (simulationRef.current) {
-        simulationRef.current.stop()
-        d.fx = d.x
-        d.fy = d.y
-      }
-
-      const [x, y] = d3.pointer(event, container)
-      setTooltip({ x, y, node: d })
-
-      const nodeSelection = d3.select(this)
-      const nodeColor = getNodeColor(d.type, isDark)
-      
-      nodeSelection.select('circle')
-        .transition().duration(100)
-        .attr('r', getNodeSize(d.weight) * 1.2)
-        .attr('fill', nodeColor)
-        .attr('stroke', isDark ? '#ffffff60' : '#00000030')
-        .attr('stroke-width', 2)
-        .style('filter', isDark ? 'drop-shadow(0 0 15px rgba(74, 222, 128, 0.6))' : 'drop-shadow(0 0 12px rgba(74, 222, 128, 0.5))')
-
-      nodeSelection.select('text')
-        .transition().duration(100)
-        .attr('font-weight', 700)
-        .style('opacity', 1)
-        .attr('fill', isDark ? '#e5e7eb' : '#1f2937')
-
-      edge.transition().duration(100)
-        .attr('opacity', (e: any) => {
-          if (e.source.id === d.id || e.target.id === d.id) return 1
-          const sourceHighlighted = isHighlighted(e.source.label)
-          const targetHighlighted = isHighlighted(e.target.label)
-          return sourceHighlighted && targetHighlighted ? 0.6 : 0.2
-        })
-        .attr('stroke-width', (e: any) => {
-          if (e.source.id === d.id || e.target.id === d.id) return 2
-          return Math.max(1, e.weight)
-        })
-
-      node.transition().duration(100)
-        .style('opacity', (n) => {
-          if (n.id === d.id) return 1
-          const connected = edges.some(
-            (e: any) => (e.source.id === d.id && e.target.id === n.id) || (e.target.id === d.id && e.source.id === n.id)
-          )
-          return connected ? 0.85 : 0.3
-        })
-    })
-
-    node.on('mouseleave', function(event, d) {
-      setHoveredNodeId(null)
-      
-      d.fx = null
-      d.fy = null
-      
-      if (simulationRef.current) {
-        simulationRef.current.alpha(0.1).restart()
-      }
-
-      setTooltip({ x: 0, y: 0, node: null })
-
-      const nodeSelection = d3.select(this)
-      
-      nodeSelection.select('circle')
-        .transition().duration(100)
-        .attr('r', getNodeSize(d.weight))
-        .attr('fill', () => {
-          if (isHighlighted(d.label)) {
-            return getNodeColor(d.type, isDark)
-          }
-          return isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.2)'
-        })
-        .attr('stroke', () => {
-          if (isHighlighted(d.label)) {
-            return isDark ? '#ffffff40' : '#00000020'
-          }
-          return isDark ? '#ffffff10' : '#00000010'
-        })
-        .attr('stroke-width', () => isHighlighted(d.label) ? 2 : 1)
-        .style('filter', () => {
-          if (isHighlighted(d.label)) {
-            return isDark ? 'drop-shadow(0 0 10px rgba(74, 222, 128, 0.5))' : 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.4))'
-          }
-          return 'none'
-        })
-
-      nodeSelection.select('text')
-        .transition().duration(100)
-        .attr('font-weight', () => isHighlighted(d.label) ? 600 : 400)
-        .style('opacity', () => isHighlighted(d.label) ? 1 : 0.5)
-        .attr('fill', isDark ? '#9ca3af' : '#6b7280')
-
-      edge.transition().duration(100)
-        .attr('opacity', (d: any) => {
-          const sourceHighlighted = isHighlighted(d.source.label)
-          const targetHighlighted = isHighlighted(d.target.label)
-          if (sourceHighlighted && targetHighlighted) {
-            return 0.9
-          }
-          return 0.5
-        })
-        .attr('stroke-width', (d: any) => {
-          const sourceHighlighted = isHighlighted(d.source.label)
-          const targetHighlighted = isHighlighted(d.target.label)
-          if (sourceHighlighted && targetHighlighted) {
-            return 2.5
-          }
-          return Math.max(1, d.weight)
-        })
-
-      node.transition().duration(100)
-        .style('opacity', 1)
-    })
-
     node.on('click', function(event, d) {
       event.stopPropagation()
       handleNodeClick(d)
     })
 
+    function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      if (!event.active) simulation.alphaTarget(0.2).restart()
+      event.subject.fx = event.x
+      event.subject.fy = event.y
+    }
+
+    function dragged(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      event.subject.fx = event.x
+      event.subject.fy = event.y
+    }
+
+    function dragended(event: d3.D3DragEvent<SVGGElement, GraphNode>) {
+      if (!event.active) simulation.alphaTarget(0)
+      event.subject.fx = null
+      event.subject.fy = null
+    }
+
     simulation.on('tick', () => {
-      edge
+      link
         .attr('x1', (d: any) => d.source.x)
         .attr('y1', (d: any) => d.source.y)
         .attr('x2', (d: any) => d.target.x)
         .attr('y2', (d: any) => d.target.y)
 
-      node.attr('transform', (d) => `translate(${d.x}, ${d.y})`)
+      node.attr('transform', (d) => `translate(${d.x},${d.y})`)
     })
-
-    setTimeout(() => {
-      simulation.alpha(1).restart()
-    }, 100)
 
     const handleResize = () => {
       if (!containerRef.current) return
@@ -319,8 +211,8 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
       const newHeight = containerRef.current.clientHeight
       if (newWidth > 0 && newHeight > 0) {
         svg.attr('width', newWidth).attr('height', newHeight)
-        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2).strength(0.05))
-        simulation.alpha(0.3).restart()
+        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+        simulation.alpha(0.2).restart()
       }
     }
 
@@ -334,7 +226,7 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
 
   if (!graphData) {
     return (
-      <div className="w-full bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 flex items-center justify-center" style={{ height: `${height}px` }}>
+      <div className="w-full flex items-center justify-center" style={{ height: `${height}px`, background: isDark ? '#0f1217' : '#f9fafb' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-800 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 dark:text-gray-400">加载中...</p>
@@ -344,62 +236,35 @@ export function KnowledgeGraph({ isPreview = false, highlightedLabels = ['React'
   }
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800" style={{ height: `${height}px` }}>
+    <div 
+      className="relative w-full h-full"
+      style={{ background: isDark ? '#0f1217' : '#f9fafb', transition: 'background 0.4s ease' }}
+    >
+      <div ref={containerRef} className="w-full" style={{ height: `${height}px`, cursor: 'grab' }}>
         <svg ref={svgRef} className="w-full h-full" />
       </div>
 
-      {tooltip.node && (
-        <div
-          className="absolute pointer-events-none z-50 px-4 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-lg shadow-xl border border-gray-700 max-w-xs"
-          style={{
-            left: Math.min(tooltip.x + 15, (containerRef.current?.clientWidth || 0) - 220),
-            top: tooltip.y - 60,
-            transform: tooltip.x > (containerRef.current?.clientWidth || 0) - 250 ? 'translateX(-100%)' : 'none'
-          }}
-        >
-          <div className="font-bold text-sm mb-1.5">
-            {tooltip.node.label}
-          </div>
-          <div className="text-xs text-gray-300 mb-1">
-            <span className={`inline-block px-2 py-0.5 rounded-full text-xs mr-2 ${
-              tooltip.node.type === 'skill' ? 'bg-blue-900/50 text-blue-400' :
-              tooltip.node.type === 'ability' ? 'bg-purple-900/50 text-purple-400' :
-              tooltip.node.type === 'project' ? 'bg-green-900/50 text-green-400' :
-              'bg-orange-900/50 text-orange-400'
-            }`}>
-              {tooltip.node.type === 'skill' ? '技能' :
-               tooltip.node.type === 'ability' ? '能力' :
-               tooltip.node.type === 'project' ? '项目' :
-               '经历'}
-            </span>
-          </div>
-          <div className="text-xs text-gray-400">
-            关联: {tooltip.node.weight} 个
-          </div>
-          <div className="mt-2 pt-1.5 border-t border-gray-700 text-xs text-green-400">
-            点击查看详情 →
-          </div>
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3 text-xs">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+          <div className="w-2 h-2 rounded-full bg-green-600"></div>
+          <span style={{ color: isDark ? '#e2e8f0' : '#2d3748' }}>技能</span>
         </div>
-      )}
-
-      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-          <span>技能</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+          <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+          <span style={{ color: isDark ? '#e2e8f0' : '#2d3748' }}>能力</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-          <span>能力</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+          <div className="w-2 h-2 rounded-full bg-gray-600"></div>
+          <span style={{ color: isDark ? '#e2e8f0' : '#2d3748' }}>项目</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
           <div className="w-2 h-2 rounded-full bg-green-500"></div>
-          <span>项目</span>
+          <span style={{ color: isDark ? '#e2e8f0' : '#2d3748' }}>经历</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-          <span>经历</span>
-        </div>
+      </div>
+
+      <div className="absolute top-4 right-4 text-xs px-3 py-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: isDark ? '#e2e8f0' : '#2d3748' }}>
+        按空格键切换主题
       </div>
     </div>
   )
