@@ -1,11 +1,25 @@
 import { useCallback } from 'react'
-import { logger, createModuleLogger } from '@utils/logger'
+import { logger, createModuleLogger, type ModuleLogger } from '@utils/logger'
 import { useLogContext } from '@components/common/LogProvider'
 
-export function useLogger() {
+interface UseLoggerResult {
+  log: {
+    debug: (message: string, details?: Record<string, unknown>) => void
+    info: (message: string, details?: Record<string, unknown>) => void
+    warn: (message: string, details?: Record<string, unknown>) => void
+    error: (message: string, details?: Record<string, unknown>, error?: Error) => void
+  }
+  startTimer: () => () => void
+  createLogger: (moduleName: string) => ModuleLogger
+  traceId: string
+  getLogs: () => ReturnType<typeof logger.getLogs>
+  clearLogs: () => void
+}
+
+export function useLogger(): UseLoggerResult {
   const { traceId } = useLogContext()
 
-  const log = useCallback({
+  const log = {
     debug: (message: string, details?: Record<string, unknown>) => {
       logger.debug(message, undefined, details)
     },
@@ -18,7 +32,7 @@ export function useLogger() {
     error: (message: string, details?: Record<string, unknown>, error?: Error) => {
       logger.error(message, undefined, details, error)
     }
-  } as const, [traceId])
+  }
 
   const startTimer = useCallback(() => {
     return logger.startTimer()
@@ -38,6 +52,6 @@ export function useLogger() {
   }
 }
 
-export function useModuleLogger(moduleName: string) {
+export function useModuleLogger(moduleName: string): ModuleLogger {
   return createModuleLogger(moduleName)
 }

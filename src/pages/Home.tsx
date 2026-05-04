@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Navbar } from '@components/common/Layout'
 import { Hero } from '@components/core/Hero'
 import { ProjectList } from '@components/core/ProjectList'

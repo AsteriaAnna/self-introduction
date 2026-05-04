@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
-import { useErrorContext } from '../common/ErrorBoundary/ErrorProvider'
-import { classifyError, type ErrorCategory } from '../common/ErrorBoundary/ErrorBoundary'
+import { useErrorContext } from '@components/common/ErrorBoundary/ErrorProvider'
+import { classifyError, type ErrorCategory } from '@components/common/ErrorBoundary/ErrorBoundary'
 
 export function useErrorHandler() {
   const { logError } = useErrorContext()

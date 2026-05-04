@@ -134,7 +134,15 @@ class Logger {
 
 export const logger = new Logger()
 
-export function createModuleLogger(moduleName: string): Pick<typeof logger, 'debug' | 'info' | 'warn' | 'error' | 'startTimer'> {
+interface ModuleLogger {
+  debug: (message: string, details?: Record<string, unknown>) => void
+  info: (message: string, details?: Record<string, unknown>) => void
+  warn: (message: string, details?: Record<string, unknown>) => void
+  error: (message: string, details?: Record<string, unknown>, error?: Error) => void
+  startTimer: () => () => void
+}
+
+export function createModuleLogger(moduleName: string): ModuleLogger {
   return {
     debug: (message: string, details?: Record<string, unknown>) => logger.debug(message, moduleName, details),
     info: (message: string, details?: Record<string, unknown>) => logger.info(message, moduleName, details),

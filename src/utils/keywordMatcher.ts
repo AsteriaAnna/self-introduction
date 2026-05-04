@@ -1,5 +1,4 @@
 import { Project, Experience } from '@/types'
-import { getAllProjects, getAllExperiences } from './markdownParser'
 
 const SKILL_KEYWORDS = [
   'React', 'Vue', 'Angular', 'Node.js', 'Python', 'Java', 'Go', 'TypeScript',

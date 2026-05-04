@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-[120vh] flex items-center justify-center px-4 py-20 bg-gradient-to-b from-gray-50 via-white to-green-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-green-900/5"
+      className="min-h-screen flex items-center justify-center px-4 pt-20 pb-12 bg-gradient-to-b from-gray-50 via-white to-green-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-green-900/5"
     >
       <div
         className={`max-w-4xl mx-auto text-center transition-all duration-1000 ease-out ${

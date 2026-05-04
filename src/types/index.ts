@@ -34,6 +34,11 @@ export interface GraphNode {
   label: string;
   type: 'skill' | 'ability' | 'project' | 'experience';
   weight: number;
+  originalId?: string;
+  x?: number;
+  y?: number;
+  fx?: number;
+  fy?: number;
 }
 
 export interface GraphEdge {

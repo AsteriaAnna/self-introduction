@@ -10,7 +10,7 @@ import { extractKeywords, matchProjects, matchExperiences } from '@/utils/keywor
 export default function MatchResult() {
   const location = useLocation()
   const navigate = useNavigate()
-  const [jdText, setJdText] = useState('')
+  const [, setJdText] = useState('')
   const [extractedKeywords, setExtractedKeywords] = useState<string[]>([])
   const [matchedProjects, setMatchedProjects] = useState<Project[]>([])
   const [matchedExperiences, setMatchedExperiences] = useState<Experience[]>([])
