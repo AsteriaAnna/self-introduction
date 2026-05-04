@@ -69,6 +69,7 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
 
         {experience.content && (
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-2 text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
           >

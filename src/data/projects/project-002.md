@@ -1,25 +1,25 @@
 ---
 id: project-002
-title: 数据可视化平台
-date: 2025-12-01
-tags: [React, D3.js, TypeScript, Node.js]
-link: https://example.com
+title: 校园二手交易平台
+date: 2026-03-15
+tags: [Vue.js, Node.js, MongoDB, WebSocket]
+link: https://github.com/AsteriaAnna/campus-market
 status: completed
 ---
 
 ## 项目描述
 
-一个企业级数据可视化平台，支持多种图表类型的实时展示。
+一个面向高校学生的二手交易平台，支持商品发布、即时聊天、校园认证等功能。
 
 ## 技术栈
 
-- React + D3.js
-- TypeScript
-- Node.js 后端
-- WebSocket 实时数据
+- Vue.js 3 + TypeScript
+- Node.js + Express
+- MongoDB 数据库
+- WebSocket 即时通讯
 
 ## 主要成果
 
-- 支持10+种图表类型
-- 实时数据更新
-- 可交互的图表操作
+- 日活用户1000+
+- 支持实时聊天功能
+- 实现校园邮箱认证
