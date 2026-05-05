@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { ThemeToggle } from '@components/extensions/Theme'
-import { useLanguage } from '@components/extensions/Language'
-import { Link, useLocation } from 'react-router-dom'
+import { useState } from 'react';
+import { ThemeToggle } from '@components/extensions/Theme';
+import { useLanguage } from '@components/extensions/Language';
+import { Link, useLocation } from 'react-router-dom';
 
 function LanguageToggle() {
-  const { language, toggleLanguage } = useLanguage()
+  const { language, toggleLanguage } = useLanguage();
   return (
     <button
       onClick={toggleLanguage}
@@ -12,7 +12,7 @@ function LanguageToggle() {
     >
       {language === 'zh' ? 'EN' : '中'}
     </button>
-  )
+  );
 }
 
 function MobileMenuButton({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) {
@@ -24,29 +24,39 @@ function MobileMenuButton({ isOpen, onClick }: { isOpen: boolean; onClick: () =>
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         {isOpen ? (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         ) : (
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
         )}
       </svg>
     </button>
-  )
+  );
 }
 
 export function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const location = useLocation()
-  const { t } = useLanguage()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { t } = useLanguage();
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id)
+    const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-    setIsMobileMenuOpen(false)
-  }
+    setIsMobileMenuOpen(false);
+  };
 
-  const isHomePage = location.pathname === '/'
+  const isHomePage = location.pathname === '/';
 
   const NavLinks = () => (
     <>
@@ -75,14 +85,14 @@ export function Navbar() {
         {t('nav.contact')}
       </button>
     </>
-  )
+  );
 
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 border-b border-gray-200/30 dark:border-gray-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="text-lg font-light tracking-wider text-gray-900 dark:text-white"
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -90,7 +100,9 @@ export function Navbar() {
           </Link>
           <div className="flex items-center gap-4 sm:gap-8">
             <div className="hidden md:flex items-center gap-8">
-              {isHomePage ? <NavLinks /> : (
+              {isHomePage ? (
+                <NavLinks />
+              ) : (
                 <Link
                   to="/"
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm tracking-wide"
@@ -101,9 +113,9 @@ export function Navbar() {
             </div>
             <LanguageToggle />
             <ThemeToggle />
-            <MobileMenuButton 
-              isOpen={isMobileMenuOpen} 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            <MobileMenuButton
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             />
           </div>
         </div>
@@ -140,5 +152,5 @@ export function Navbar() {
         </div>
       )}
     </>
-  )
+  );
 }

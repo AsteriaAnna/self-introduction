@@ -1,14 +1,19 @@
-import { Link } from 'react-router-dom'
-import { Experience } from '@/types'
+import { Link } from 'react-router-dom';
+import { Experience } from '@/types';
 
 interface TimelineItemProps {
-  experience: Experience
-  isLast?: boolean
-  isHighlighted?: boolean
-  matchScore?: number
+  experience: Experience;
+  isLast?: boolean;
+  isHighlighted?: boolean;
+  matchScore?: number;
 }
 
-export function TimelineItem({ experience, isLast = false, isHighlighted = false, matchScore }: TimelineItemProps) {
+export function TimelineItem({
+  experience,
+  isLast = false,
+  isHighlighted = false,
+  matchScore,
+}: TimelineItemProps) {
   return (
     <div className="relative pl-8 pb-8">
       {!isLast && (
@@ -31,12 +36,8 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
       >
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {experience.role}
-            </h3>
-            <p className="text-green-600 dark:text-green-500 font-medium">
-              {experience.company}
-            </p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{experience.role}</h3>
+            <p className="text-green-600 dark:text-green-500 font-medium">{experience.company}</p>
           </div>
           <div className="text-right">
             {matchScore !== undefined && (
@@ -44,13 +45,9 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
                 {Math.round(matchScore)}% 匹配
               </span>
             )}
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {experience.period}
-            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{experience.period}</span>
             {experience.location && (
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                {experience.location}
-              </p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">{experience.location}</p>
             )}
           </div>
         </div>
@@ -96,5 +93,5 @@ export function TimelineItem({ experience, isLast = false, isHighlighted = false
         </Link>
       </div>
     </div>
-  )
+  );
 }

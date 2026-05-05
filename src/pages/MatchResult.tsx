@@ -1,72 +1,73 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Navbar } from '@components/common/Layout'
-import { ProjectCard } from '@components/core/ProjectList/ProjectCard'
-import { TimelineItem } from '@components/core/Experience/TimelineItem'
-import { Project, Experience } from '@/types'
-import { getAllProjects, getAllExperiences } from '@/utils/markdownParser'
-import { extractKeywords, matchProjects, matchExperiences } from '@/utils/keywordMatcher'
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Navbar } from '@components/common/Layout';
+import { ProjectCard } from '@components/core/ProjectList/ProjectCard';
+import { TimelineItem } from '@components/core/Experience/TimelineItem';
+import { Project, Experience } from '@/types';
+import { getAllProjects, getAllExperiences } from '@/utils/markdownParser';
+import { extractKeywords, matchProjects, matchExperiences } from '@/utils/keywordMatcher';
 
 export default function MatchResult() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [, setJdText] = useState('')
-  const [extractedKeywords, setExtractedKeywords] = useState<string[]>([])
-  const [matchedProjects, setMatchedProjects] = useState<Project[]>([])
-  const [matchedExperiences, setMatchedExperiences] = useState<Experience[]>([])
-  const [projectScores, setProjectScores] = useState<Map<string, number>>(new Map())
-  const [experienceScores, setExperienceScores] = useState<Map<string, number>>(new Map())
-  const [overallScore, setOverallScore] = useState(0)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [, setJdText] = useState('');
+  const [extractedKeywords, setExtractedKeywords] = useState<string[]>([]);
+  const [matchedProjects, setMatchedProjects] = useState<Project[]>([]);
+  const [matchedExperiences, setMatchedExperiences] = useState<Experience[]>([]);
+  const [projectScores, setProjectScores] = useState<Map<string, number>>(new Map());
+  const [experienceScores, setExperienceScores] = useState<Map<string, number>>(new Map());
+  const [overallScore, setOverallScore] = useState(0);
 
   useEffect(() => {
-    const state = location.state as { jdText?: string }
+    const state = location.state as { jdText?: string };
     if (state?.jdText) {
-      setJdText(state.jdText)
-      processMatch(state.jdText)
+      setJdText(state.jdText);
+      processMatch(state.jdText);
     } else {
-      navigate('/')
+      navigate('/');
     }
-  }, [location.state, navigate])
+  }, [location.state, navigate]);
 
   const processMatch = (text: string) => {
-    const keywords = extractKeywords(text)
-    setExtractedKeywords(keywords)
+    const keywords = extractKeywords(text);
+    setExtractedKeywords(keywords);
 
-    const projects = getAllProjects()
-    const experiences = getAllExperiences()
+    const projects = getAllProjects();
+    const experiences = getAllExperiences();
 
-    const { matchedProjects: projs, matchScores: projScores } = matchProjects(keywords, projects)
-    const { matchedExperiences: exps, matchScores: expScores } = matchExperiences(keywords, experiences)
+    const { matchedProjects: projs, matchScores: projScores } = matchProjects(keywords, projects);
+    const { matchedExperiences: exps, matchScores: expScores } = matchExperiences(
+      keywords,
+      experiences
+    );
 
-    setMatchedProjects(projs)
-    setMatchedExperiences(exps)
-    setProjectScores(projScores)
-    setExperienceScores(expScores)
+    setMatchedProjects(projs);
+    setMatchedExperiences(exps);
+    setProjectScores(projScores);
+    setExperienceScores(expScores);
 
-    const maxProjectScore = projs.length > 0
-      ? Math.max(...projs.map(p => projScores.get(p.id) || 0))
-      : 0
+    const maxProjectScore =
+      projs.length > 0 ? Math.max(...projs.map((p) => projScores.get(p.id) || 0)) : 0;
 
-    const maxExperienceScore = exps.length > 0
-      ? Math.max(...exps.map(e => expScores.get(e.id) || 0))
-      : 0
+    const maxExperienceScore =
+      exps.length > 0 ? Math.max(...exps.map((e) => expScores.get(e.id) || 0)) : 0;
 
-    let overall = 0
+    let overall = 0;
     if (projs.length > 0 && exps.length > 0) {
-      overall = Math.round((maxProjectScore + maxExperienceScore) / 2)
+      overall = Math.round((maxProjectScore + maxExperienceScore) / 2);
     } else if (projs.length > 0) {
-      overall = Math.round(maxProjectScore)
+      overall = Math.round(maxProjectScore);
     } else if (exps.length > 0) {
-      overall = Math.round(maxExperienceScore)
+      overall = Math.round(maxExperienceScore);
     }
-    setOverallScore(overall)
-  }
+    setOverallScore(overall);
+  };
 
   const goBack = () => {
-    navigate('/')
-  }
+    navigate('/');
+  };
 
-  const totalMatches = matchedProjects.length + matchedExperiences.length
+  const totalMatches = matchedProjects.length + matchedExperiences.length;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white">
@@ -79,14 +80,17 @@ export default function MatchResult() {
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               返回首页
             </button>
             <h1 className="text-4xl font-bold mb-4">JD匹配结果</h1>
-            <p className="text-white/80 mb-8">
-              根据您提供的招聘需求，为您匹配以下项目和经历
-            </p>
+            <p className="text-white/80 mb-8">根据您提供的招聘需求，为您匹配以下项目和经历</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6">
@@ -199,5 +203,5 @@ export default function MatchResult() {
         )}
       </main>
     </div>
-  )
+  );
 }

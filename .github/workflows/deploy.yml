@@ -3,8 +3,8 @@ name: Deploy to GitHub Pages
 on:
   # 在 push 到 main 分支时触发
   push:
-    branches: [ "main" ]
-  
+    branches: ['main']
+
   # 允许你从 Actions 选项卡手动触发工作流程
   workflow_dispatch:
 
@@ -16,7 +16,7 @@ permissions:
 
 # 只允许一个并发部署
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -26,22 +26,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build
         run: npm run build
         env:
           # 设置为仓库名称以支持 GitHub Pages 路径
           VITE_BASE_PATH: '/self-introduction/'
-          
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

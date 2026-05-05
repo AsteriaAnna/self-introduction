@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Language = 'zh' | 'en'
+type Language = 'zh' | 'en';
 
-type TranslationKey = 
+type TranslationKey =
   | 'nav.home'
   | 'nav.skills'
   | 'nav.graph'
@@ -42,14 +42,14 @@ type TranslationKey =
   | 'not.found.subtitle'
   | 'loading'
   | 'no.content'
-  | 'related.items'
+  | 'related.items';
 
-type Translations = { [key in TranslationKey]: string }
+type Translations = { [key in TranslationKey]: string };
 
 interface LanguageContextType {
-  language: Language
-  toggleLanguage: () => void
-  t: (key: TranslationKey) => string
+  language: Language;
+  toggleLanguage: () => void;
+  t: (key: TranslationKey) => string;
 }
 
 const translations: { zh: Translations; en: Translations } = {
@@ -91,9 +91,9 @@ const translations: { zh: Translations; en: Translations } = {
     'skill.detail.experience': '经历',
     'not.found.title': '页面不存在',
     'not.found.subtitle': '返回首页',
-    'loading': '加载中...',
+    loading: '加载中...',
     'no.content': '暂无相关内容',
-    'related.items': '相关内容'
+    'related.items': '相关内容',
   },
   en: {
     'nav.home': 'Home',
@@ -133,43 +133,43 @@ const translations: { zh: Translations; en: Translations } = {
     'skill.detail.experience': 'Experience',
     'not.found.title': 'Page not found',
     'not.found.subtitle': 'Back to Home',
-    'loading': 'Loading...',
+    loading: 'Loading...',
     'no.content': 'No related content found',
-    'related.items': 'related items'
-  }
-}
+    'related.items': 'related items',
+  },
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
-    const stored = localStorage.getItem('language')
-    return (stored as Language) || 'zh'
-  })
+    const stored = localStorage.getItem('language');
+    return (stored as Language) || 'zh';
+  });
 
   useEffect(() => {
-    localStorage.setItem('language', language)
-  }, [language])
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const toggleLanguage = () => {
-    setLanguageState(prev => prev === 'zh' ? 'en' : 'zh')
-  }
+    setLanguageState((prev) => (prev === 'zh' ? 'en' : 'zh'));
+  };
 
   const t = (key: TranslationKey): string => {
-    return translations[language][key] || key
-  }
+    return translations[language][key] || key;
+  };
 
   return (
     <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
       {children}
     </LanguageContext.Provider>
-  )
+  );
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
+  const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
-  return context
+  return context;
 }

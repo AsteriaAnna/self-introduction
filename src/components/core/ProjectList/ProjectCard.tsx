@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom'
-import { Project } from '@/types'
+import { Link } from 'react-router-dom';
+import { Project } from '@/types';
 
 interface ProjectCardProps {
-  project: Project
-  isHighlighted?: boolean
-  matchScore?: number
+  project: Project;
+  isHighlighted?: boolean;
+  matchScore?: number;
 }
 
 export function ProjectCard({ project, isHighlighted = false, matchScore }: ProjectCardProps) {
@@ -18,9 +18,7 @@ export function ProjectCard({ project, isHighlighted = false, matchScore }: Proj
       }`}
     >
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-          {project.title}
-        </h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
         <div className="flex items-center gap-2">
           {matchScore !== undefined && (
             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded-full text-sm font-semibold">
@@ -32,22 +30,20 @@ export function ProjectCard({ project, isHighlighted = false, matchScore }: Proj
               project.status === 'completed'
                 ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
                 : project.status === 'in-progress'
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
             }`}
           >
             {project.status === 'completed'
               ? '已完成'
               : project.status === 'in-progress'
-              ? '进行中'
-              : '计划中'}
+                ? '进行中'
+                : '计划中'}
           </span>
         </div>
       </div>
 
-      <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-        {project.description}
-      </p>
+      <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">{project.description}</p>
 
       {project.skillTags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
@@ -77,10 +73,8 @@ export function ProjectCard({ project, isHighlighted = false, matchScore }: Proj
 
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>{project.date}</span>
-        <span className="text-green-600 dark:text-green-500 font-medium">
-          查看详情 →
-        </span>
+        <span className="text-green-600 dark:text-green-500 font-medium">查看详情 →</span>
       </div>
     </Link>
-  )
+  );
 }

@@ -1,63 +1,66 @@
-import { useEffect, useState } from 'react'
-import { Experience } from '@/types'
-import { getAllExperiences } from '@/utils/markdownParser'
-import { TimelineItem } from './TimelineItem'
+import { useEffect, useState } from 'react';
+import { Experience } from '@/types';
+import { getAllExperiences } from '@/utils/markdownParser';
+import { TimelineItem } from './TimelineItem';
 
 interface ExperienceTimelineProps {
-  filterKeywords?: string[]
-  highlightedIds?: string[]
+  filterKeywords?: string[];
+  highlightedIds?: string[];
 }
 
-export function ExperienceTimeline({ filterKeywords = [], highlightedIds = [] }: ExperienceTimelineProps) {
-  const [experiences, setExperiences] = useState<Experience[]>([])
-  const [isVisible, setIsVisible] = useState(false)
+export function ExperienceTimeline({
+  filterKeywords = [],
+  highlightedIds = [],
+}: ExperienceTimelineProps) {
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const loadedExperiences = getAllExperiences()
-    setExperiences(loadedExperiences)
-  }, [])
+    const loadedExperiences = getAllExperiences();
+    setExperiences(loadedExperiences);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true)
+          setIsVisible(true);
         }
       },
       { threshold: 0.1 }
-    )
+    );
 
-    const element = document.getElementById('experience')
+    const element = document.getElementById('experience');
     if (element) {
-      observer.observe(element)
+      observer.observe(element);
     }
 
     return () => {
       if (element) {
-        observer.unobserve(element)
+        observer.unobserve(element);
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  const filteredExperiences = filterKeywords.length > 0
-    ? experiences.filter(exp =>
-        filterKeywords.some(keyword =>
-          exp.skillTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
-          exp.abilityTags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())) ||
-          exp.role.toLowerCase().includes(keyword.toLowerCase()) ||
-          exp.company.toLowerCase().includes(keyword.toLowerCase())
+  const filteredExperiences =
+    filterKeywords.length > 0
+      ? experiences.filter((exp) =>
+          filterKeywords.some(
+            (keyword) =>
+              exp.skillTags.some((tag) => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+              exp.abilityTags.some((tag) => tag.toLowerCase().includes(keyword.toLowerCase())) ||
+              exp.role.toLowerCase().includes(keyword.toLowerCase()) ||
+              exp.company.toLowerCase().includes(keyword.toLowerCase())
+          )
         )
-      )
-    : experiences
+      : experiences;
 
   if (filteredExperiences.length === 0 && filterKeywords.length > 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
-          没有找到匹配的经历
-        </p>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">没有找到匹配的经历</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -80,5 +83,5 @@ export function ExperienceTimeline({ filterKeywords = [], highlightedIds = [] }:
         </div>
       ))}
     </div>
-  )
+  );
 }

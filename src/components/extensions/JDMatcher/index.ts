@@ -1,1 +1,1 @@
-export { JDMatcher } from './JDMatcher'
+export { JDMatcher } from './JDMatcher';

@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { Project, Experience } from '@/types'
-import { getAllProjects, getAllExperiences } from '@/utils/markdownParser'
-import { Navbar } from '@components/common/Layout'
-import { useTheme } from '@components/extensions/Theme'
-import { useLanguage } from '@components/extensions/Language'
+import { useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Project, Experience } from '@/types';
+import { getAllProjects, getAllExperiences } from '@/utils/markdownParser';
+import { Navbar } from '@components/common/Layout';
+import { useTheme } from '@components/extensions/Theme';
+import { useLanguage } from '@components/extensions/Language';
 
 function ProjectItem({ project }: { project: Project }) {
-  const { theme } = useTheme()
-  
+  const { theme } = useTheme();
+
   return (
     <Link
       to={`/project/${project.id}`}
@@ -22,7 +22,9 @@ function ProjectItem({ project }: { project: Project }) {
           {project.date}
         </span>
       </div>
-      <p className={`text-sm leading-loose mb-4 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+      <p
+        className={`text-sm leading-loose mb-4 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+      >
         {project.description}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -36,12 +38,12 @@ function ProjectItem({ project }: { project: Project }) {
         ))}
       </div>
     </Link>
-  )
+  );
 }
 
 function ExperienceItem({ experience }: { experience: Experience }) {
-  const { theme } = useTheme()
-  
+  const { theme } = useTheme();
+
   return (
     <Link
       to={`/experience/${experience.id}`}
@@ -58,7 +60,9 @@ function ExperienceItem({ experience }: { experience: Experience }) {
       <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
         {experience.role}
       </p>
-      <p className={`text-sm leading-loose mb-4 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+      <p
+        className={`text-sm leading-loose mb-4 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+      >
         {experience.description}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -72,52 +76,54 @@ function ExperienceItem({ experience }: { experience: Experience }) {
         ))}
       </div>
     </Link>
-  )
+  );
 }
 
 export default function SkillDetail() {
-  const { label } = useParams<{ label: string }>()
-  const navigate = useNavigate()
-  const [relatedProjects, setRelatedProjects] = useState<Project[]>([])
-  const [relatedExperiences, setRelatedExperiences] = useState<Experience[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { theme } = useTheme()
-  const { t } = useLanguage()
+  const { label } = useParams<{ label: string }>();
+  const navigate = useNavigate();
+  const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
+  const [relatedExperiences, setRelatedExperiences] = useState<Experience[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { theme } = useTheme();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!label) {
-      navigate('/')
-      return
+      navigate('/');
+      return;
     }
 
-    const projects = getAllProjects()
-    const experiences = getAllExperiences()
+    const projects = getAllProjects();
+    const experiences = getAllExperiences();
 
-    const filteredProjects = projects.filter(project => 
-      project.skillTags.includes(label) || project.abilityTags.includes(label)
-    )
+    const filteredProjects = projects.filter(
+      (project) => project.skillTags.includes(label) || project.abilityTags.includes(label)
+    );
 
-    const filteredExperiences = experiences.filter(exp => 
-      exp.skillTags.includes(label) || exp.abilityTags.includes(label)
-    )
+    const filteredExperiences = experiences.filter(
+      (exp) => exp.skillTags.includes(label) || exp.abilityTags.includes(label)
+    );
 
-    setRelatedProjects(filteredProjects)
-    setRelatedExperiences(filteredExperiences)
-    setIsLoading(false)
-  }, [label, navigate])
+    setRelatedProjects(filteredProjects);
+    setRelatedExperiences(filteredExperiences);
+    setIsLoading(false);
+  }, [label, navigate]);
 
   if (isLoading) {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
         <Navbar />
-        <div className={`text-center py-32 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'} text-sm tracking-wide`}>
+        <div
+          className={`text-center py-32 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'} text-sm tracking-wide`}
+        >
           {t('loading')}
         </div>
       </div>
-    )
+    );
   }
 
-  const hasData = relatedProjects.length > 0 || relatedExperiences.length > 0
+  const hasData = relatedProjects.length > 0 || relatedExperiences.length > 0;
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
@@ -129,7 +135,12 @@ export default function SkillDetail() {
           className="inline-flex items-center gap-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mb-16 text-sm tracking-wide transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           {t('nav.back')}
         </Link>
@@ -139,7 +150,7 @@ export default function SkillDetail() {
             {label}
           </h1>
           <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-            {hasData 
+            {hasData
               ? `${relatedProjects.length + relatedExperiences.length} ${t('related.items')}`
               : t('no.content')}
           </p>
@@ -149,7 +160,9 @@ export default function SkillDetail() {
           <>
             {relatedProjects.length > 0 && (
               <section className="mb-12">
-                <h2 className={`text-xs tracking-[0.3em] uppercase mb-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                <h2
+                  className={`text-xs tracking-[0.3em] uppercase mb-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+                >
                   {t('skill.detail.projects')}
                 </h2>
                 <div>
@@ -162,7 +175,9 @@ export default function SkillDetail() {
 
             {relatedExperiences.length > 0 && (
               <section>
-                <h2 className={`text-xs tracking-[0.3em] uppercase mb-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                <h2
+                  className={`text-xs tracking-[0.3em] uppercase mb-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}
+                >
                   {t('skill.detail.experience')}
                 </h2>
                 <div>
@@ -182,5 +197,5 @@ export default function SkillDetail() {
         )}
       </div>
     </div>
-  )
+  );
 }

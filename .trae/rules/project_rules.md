@@ -2,11 +2,11 @@
 
 ## 文档信息
 
-| 项目 | 内容 |
-|------|------|
-| 版本 | v1.0 |
+| 项目     | 内容       |
+| -------- | ---------- |
+| 版本     | v1.0       |
 | 创建日期 | 2026-05-04 |
-| 文档类型 | 开发规则 |
+| 文档类型 | 开发规则   |
 
 ---
 
@@ -29,6 +29,7 @@ chore/<范围>            # 杂项任务
 ```
 
 示例：
+
 ```
 feat/hero-component
 fix/theme-toggle-bug
@@ -48,6 +49,7 @@ refactor/markdown-parser
 ```
 
 **Type类型**：
+
 - `feat`: 新功能
 - `fix`: Bug修复
 - `refactor`: 重构
@@ -57,6 +59,7 @@ refactor/markdown-parser
 - `chore`: 杂项
 
 **示例**：
+
 ```
 feat(hero): add hero component with avatar support
 
@@ -184,20 +187,22 @@ git commit -m "add hero and update dependencies"
 当弹出错误时，按以下流程快速定位：
 
 **1. 冷静阅读错误信息（5秒）**
+
 - 包含 "not found"、"undefined"、"is required"？
 - 包含 "type mismatch"、"400/500"？
 
 **2. 判断错误类别（10秒）**
 
-| 错误类型 | 关键词 | 第一反应 |
-|---------|-------|---------|
-| **环境类** | required, environment, .env | 检查配置文件 |
-| **依赖类** | module not found, cannot find | npm install |
-| **逻辑类** | undefined, cannot read | 检查代码逻辑 |
-| **类型类** | type, assignable | 对照类型定义 |
-| **接口契约类** | 401/403/400, api | 检查接口文档 |
+| 错误类型       | 关键词                        | 第一反应     |
+| -------------- | ----------------------------- | ------------ |
+| **环境类**     | required, environment, .env   | 检查配置文件 |
+| **依赖类**     | module not found, cannot find | npm install  |
+| **逻辑类**     | undefined, cannot read        | 检查代码逻辑 |
+| **类型类**     | type, assignable              | 对照类型定义 |
+| **接口契约类** | 401/403/400, api              | 检查接口文档 |
 
 **3. 快速验证假设（5秒）**
+
 - 怀疑环境变量：`log.debug('Checking env', { key: 'XXX', value: process.env.XXX })`
 - 怀疑依赖：`npm list <package>`
 - 怀疑逻辑：打印中间值
@@ -207,32 +212,40 @@ git commit -m "add hero and update dependencies"
 
 向AI或他人求助时，使用以下模板：
 
-```markdown
+````markdown
 ## 问题描述
+
 [一句话概括错误现象]
 
 ## 环境信息
+
 - Node.js版本：18.x
 - npm版本：10.x
 - 操作系统：Windows/macOS/Linux
 - 框架：React 18 + Vite 5
 
 ## 重现步骤
+
 1. [步骤1]
 2. [步骤2]
 3. [触发错误]
 
 ## 最小代码
+
 ```typescript
 // 精简的复现代码
 ```
+````
 
 ## 预期结果
+
 [期望的行为]
 
 ## 实际结果
+
 [实际发生的错误]
-```
+
+````
 
 ### 4.3 禁止事项
 
@@ -250,21 +263,24 @@ git commit -m "add hero and update dependencies"
 **入口日志（INFO）**：
 ```typescript
 log.info(`==> Fetch data request`, { userId, filterKeyword })
-```
+````
 
 **出口日志（INFO）**：
+
 ```typescript
-log.info(`<== Fetch data completed`, { success: true, duration_ms: 52 })
+log.info(`<== Fetch data completed`, { success: true, duration_ms: 52 });
 ```
 
 **关键业务动作（INFO）**：
+
 ```typescript
-log.info(`User [${userId}] clicked project card`, { projectId })
+log.info(`User [${userId}] clicked project card`, { projectId });
 ```
 
 **错误日志（ERROR）**：
+
 ```typescript
-log.error(`Failed to parse markdown`, { filePath }, error as Error)
+log.error(`Failed to parse markdown`, { filePath }, error as Error);
 ```
 
 ### 5.2 禁止事项
@@ -361,14 +377,14 @@ git branch -D feat/risky-refactor
 
 每次开发前运行 `npm run doctor`：
 
-| 检查项 | 说明 |
-|-------|------|
-| Node.js版本 | 必须是18.20.4（Volta锁定） |
-| npm版本 | 必须是10.8.0（Volta锁定） |
-| Dependencies | package-lock.json必须同步 |
-| TypeScript | 必须无类型错误 |
-| Vite Config | 必须存在 |
-| Tailwind Config | 必须存在 |
+| 检查项          | 说明                       |
+| --------------- | -------------------------- |
+| Node.js版本     | 必须是18.20.4（Volta锁定） |
+| npm版本         | 必须是10.8.0（Volta锁定）  |
+| Dependencies    | package-lock.json必须同步  |
+| TypeScript      | 必须无类型错误             |
+| Vite Config     | 必须存在                   |
+| Tailwind Config | 必须存在                   |
 
 ### 8.2 环境问题处理
 
@@ -451,6 +467,7 @@ src/
 ```
 
 **每个组件目录必须包含**：
+
 - `index.ts` 导出文件
 - `*.tsx` 组件文件
 - `*.styles.ts` 样式文件（如需要）

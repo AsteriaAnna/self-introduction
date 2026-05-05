@@ -1,28 +1,26 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function JDMatcher() {
-  const navigate = useNavigate()
-  const [jdText, setJdText] = useState('')
-  const [isMatching, setIsMatching] = useState(false)
+  const navigate = useNavigate();
+  const [jdText, setJdText] = useState('');
+  const [isMatching, setIsMatching] = useState(false);
 
   const handleMatch = () => {
-    if (!jdText.trim()) return
+    if (!jdText.trim()) return;
 
-    setIsMatching(true)
+    setIsMatching(true);
 
     setTimeout(() => {
       navigate('/match-result', {
-        state: { jdText }
-      })
-    }, 500)
-  }
+        state: { jdText },
+      });
+    }, 500);
+  };
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-      <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-        JD智能匹配
-      </h3>
+      <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">JD智能匹配</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
         粘贴招聘需求，我会帮你匹配相关的项目和经历
       </p>
@@ -43,8 +41,19 @@ export function JDMatcher() {
           {isMatching ? (
             <>
               <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               匹配中...
             </>
@@ -54,5 +63,5 @@ export function JDMatcher() {
         </button>
       </div>
     </div>
-  )
+  );
 }

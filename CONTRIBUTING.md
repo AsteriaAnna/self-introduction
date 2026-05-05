@@ -6,15 +6,15 @@
 
 ## 技术栈
 
-| 类别 | 技术选型 |
-|------|---------|
-| 框架 | React 18 + Vite 5 |
-| 样式 | Tailwind CSS 3 |
-| 图表 | D3.js 7 |
-| Markdown解析 | react-markdown 9 |
-| 路由 | React Router 6 |
-| 状态管理 | React Hooks + Context |
-| 部署 | Vercel |
+| 类别         | 技术选型              |
+| ------------ | --------------------- |
+| 框架         | React 18 + Vite 5     |
+| 样式         | Tailwind CSS 3        |
+| 图表         | D3.js 7               |
+| Markdown解析 | react-markdown 9      |
+| 路由         | React Router 6        |
+| 状态管理     | React Hooks + Context |
+| 部署         | Vercel                |
 
 ## 环境配置
 
@@ -40,31 +40,31 @@ npm run dev
 
 ### Phase 1: MVP核心（Week 1-2）
 
-| 任务 | 交付物 | 状态 |
-|------|--------|------|
-| 项目初始化 | Vite + React + Tailwind配置 | ✅ |
-| Markdown解析 | 解析工具函数 | ✅ |
-| Hero组件 | Hero.tsx | ✅ |
-| ProjectList组件 | ProjectList.tsx | ✅ |
-| Experience组件 | ExperienceTimeline.tsx | ✅ |
-| 响应式布局 | 全局样式 | ✅ |
+| 任务            | 交付物                      | 状态 |
+| --------------- | --------------------------- | ---- |
+| 项目初始化      | Vite + React + Tailwind配置 | ✅   |
+| Markdown解析    | 解析工具函数                | ✅   |
+| Hero组件        | Hero.tsx                    | ✅   |
+| ProjectList组件 | ProjectList.tsx             | ✅   |
+| Experience组件  | ExperienceTimeline.tsx      | ✅   |
+| 响应式布局      | 全局样式                    | ✅   |
 
 ### Phase 2: 扩展模块（Week 3-4）
 
-| 任务 | 交付物 | 状态 |
-|------|--------|------|
-| 关键词模块 | KeywordsCloud.tsx | ✅ |
-| 主题模块 | ThemeProvider.tsx | ✅ |
-| JD匹配模块 | JDMatcher.tsx | ✅ |
-| 知识图谱模块 | KnowledgeGraph.tsx | ✅ |
+| 任务         | 交付物             | 状态 |
+| ------------ | ------------------ | ---- |
+| 关键词模块   | KeywordsCloud.tsx  | ✅   |
+| 主题模块     | ThemeProvider.tsx  | ✅   |
+| JD匹配模块   | JDMatcher.tsx      | ✅   |
+| 知识图谱模块 | KnowledgeGraph.tsx | ✅   |
 
 ### Phase 3: 优化与部署（Week 4）
 
-| 任务 | 交付物 | 状态 |
-|------|--------|------|
-| 性能优化 | 代码分割、懒加载 | ✅ |
-| 测试 | 单元测试 | 📋 |
-| 部署 | Vercel配置 | ✅ |
+| 任务     | 交付物           | 状态 |
+| -------- | ---------------- | ---- |
+| 性能优化 | 代码分割、懒加载 | ✅   |
+| 测试     | 单元测试         | 📋   |
+| 部署     | Vercel配置       | ✅   |
 
 ## 目录结构
 
@@ -92,7 +92,7 @@ project-self-introduction-v1/
 
 ## 数据格式
 
-### 项目数据 (src/data/projects/*.md)
+### 项目数据 (src/data/projects/\*.md)
 
 ```markdown
 ---
@@ -105,10 +105,11 @@ status: completed
 ---
 
 ## 项目描述
+
 ...
 ```
 
-### 经历数据 (src/data/experiences/*.md)
+### 经历数据 (src/data/experiences/\*.md)
 
 ```markdown
 ---
@@ -121,22 +122,23 @@ location: 城市
 ---
 
 ## 工作描述
+
 ...
 ```
 
 ## 常用命令
 
-| 命令 | 说明 |
-|------|------|
-| `npm run init` | 初始化环境 |
-| `npm run dev` | 启动开发服务器 |
-| `npm run build` | 构建生产版本 |
-| `npm run test` | 运行测试 |
-| `npm run lint` | ESLint检查 |
-| `npm run lint:fix` | ESLint自动修复 |
+| 命令                   | 说明           |
+| ---------------------- | -------------- |
+| `npm run init`         | 初始化环境     |
+| `npm run dev`          | 启动开发服务器 |
+| `npm run build`        | 构建生产版本   |
+| `npm run test`         | 运行测试       |
+| `npm run lint`         | ESLint检查     |
+| `npm run lint:fix`     | ESLint自动修复 |
 | `npm run format:write` | Prettier格式化 |
-| `npm run typecheck` | TypeScript检查 |
-| `npm run doctor` | 环境健康检查 |
+| `npm run typecheck`    | TypeScript检查 |
+| `npm run doctor`       | 环境健康检查   |
 
 ## 开发规范
 
